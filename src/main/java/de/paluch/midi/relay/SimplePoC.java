@@ -16,60 +16,54 @@ public class SimplePoC {
 
     public static void main(String[] args) throws Exception {
 
-        Receiver receiver = new Receiver() {
-            @Override
-            public void send(MidiMessage mm, long timeStamp) {
-                byte[] bytes = mm.getMessage();
-                byte message[] = null;
-                int t1 = 0;
-                int t2 = 0;
-                int t3 = 0;
-                byte hi;
-                byte lo;
+Receiver receiver = new Receiver() {
+    @Override
+    public void send(MidiMessage mm, long timeStamp) {
+        byte[] bytes = mm.getMessage();
+        byte message[] = null;
+        int t1 = 0;
+        int t2 = 0;
+        int t3 = 0;
+        byte hi;
+        byte lo;
 
-                if (bytes.length > 1) {
-                    t1 = bytes[0];
-                    t2 = bytes[1];
+        if (bytes.length > 1) {
+            t1 = bytes[0];
+            t2 = bytes[1];
 
-                    if (bytes.length > 2) {
-                        t3 = bytes[2];
+            if (bytes.length > 2) {
+                t3 = bytes[2];
 
-                        message = new byte[bytes.length - 3];
-                        if (bytes.length >= 3) {
-                            System.arraycopy(bytes, 3, message, 0, message.length);
-                        }
-                    }
+                message = new byte[bytes.length - 3];
+                if (bytes.length >= 3) {
+                    System.arraycopy(bytes, 3, message, 0, message.length);
                 }
-
-
-                hi = (byte) ((t1 & 0xF0) >> 4);
-                lo = (byte) (t1 & 0x0F);
-
-
-                if (lo == 9) {
-                    // drum channel, we skip that guy.
-                    return;
-                }
-
-                if (hi == MidiHelper.NOTE_ON || hi == MidiHelper.NOTE_OFF) {
-
-                    System.out.println("Note: " + t2);
-                    System.out.println("Velocity: " + t3);
-                }
-
             }
+        }
 
-            @Override
-            public void close() {
-            }
-        };
+        hi = (byte) ((t1 & 0xF0) >> 4);
+        lo = (byte) (t1 & 0x0F);
 
+        if (lo == 9) {
+            // drum channel, we skip that guy.
+            return;
+        }
 
-        Sequencer s = MidiSystem.getSequencer(false);
-        s.getTransmitter().setReceiver(receiver);
-        s.open();
-        s.setSequence(MidiSystem.getSequence(new URL("http://www.bluegrassbanjo.org/buffgals.mid")));
-        s.start();
+        if (hi == MidiHelper.NOTE_ON || hi == MidiHelper.NOTE_OFF) {
+            System.out.println("Note: " + t2);
+            System.out.println("Velocity: " + t3);
+        }
+    }
+
+    public void close() {
+    }
+};
+
+Sequencer s = MidiSystem.getSequencer(false);
+s.getTransmitter().setReceiver(receiver);
+s.open();
+s.setSequence(MidiSystem.getSequence(new URL("http://www.bluegrassbanjo.org/buffgals.mid")));
+s.start();
 
     }
 
