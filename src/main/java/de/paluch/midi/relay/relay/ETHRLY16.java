@@ -32,6 +32,7 @@ public class ETHRLY16{
     private Socket socket;
     private long lastSendTimestamp = -1;
     private long connectionKeepAlive = 30000;
+    private long bytesSent = 0;
 
 
     public final static int ALL_ON = 100;
@@ -112,6 +113,7 @@ public class ETHRLY16{
         checkOrInit();
         try {
             if (socket != null && socket.isConnected()) {
+                bytesSent++;
                 outputStream.write(command);
                 lastSendTimestamp = System.currentTimeMillis();
             }

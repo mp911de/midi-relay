@@ -83,9 +83,9 @@ public class MidiRelayReceiver implements Receiver {
 
             Integer outputChannel = channelMap.get(theNote);
             if (outputChannel != null) {
-                if (hi == MidiHelper.NOTE_ON && t3 > 10) {
+                if (hi == MidiHelper.NOTE_ON && t3 > 2) {
                     ethrly16.on(outputChannel);
-                } else if (hi == MidiHelper.NOTE_OFF || (hi == MidiHelper.NOTE_ON && t3 <= 10)) {
+                } else if (hi == MidiHelper.NOTE_OFF || (hi == MidiHelper.NOTE_ON && t3 <= 2)) {
                     ethrly16.off(outputChannel);
                 }
             }

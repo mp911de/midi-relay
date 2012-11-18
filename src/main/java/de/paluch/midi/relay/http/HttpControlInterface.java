@@ -6,6 +6,8 @@ import de.paluch.midi.relay.midi.MidiPlayer;
 import de.paluch.midi.relay.job.PlayJob;
 import org.quartz.*;
 
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -83,6 +85,40 @@ public class HttpControlInterface {
         }
         return "OK";
     }
+
+    @GET
+    @Path("in-devices/")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String setActive() throws Exception {
+        StringBuffer sb = new StringBuffer();
+
+
+        MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
+        for (MidiDevice.Info info : infos) {
+            sb.append(info.getName() + ", " + info.getDescription() + " (" + info.getVendor() + ")");
+            sb.append("\r\n");
+        }
+        return sb.toString();
+    }
+
+    @GET
+    @Path("in-devices/{id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String addInputDevice(@PathParam("id") int id) throws Exception {
+
+        MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
+        MidiDevice device= MidiSystem.getMidiDevice(infos[id]);
+
+
+
+        device.getTransmitter().setReceiver(MidiInstance.getInstance().getReceiver());
+        if(!device.isOpen())
+        {
+            device.open();
+        }
+        return "OK";
+    }
+
 
     public MidiPlayer getMidiPlayer() {
         return midiPlayer;
