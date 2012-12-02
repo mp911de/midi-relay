@@ -14,7 +14,7 @@ public class SwitchOffJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getJobDetail().getJobDataMap();
-        ETHRLY16 ethrly16 = (ETHRLY16) data.get("ethrly16Player");
-        ethrly16.on(0);
+        ETHRLY16 ethrly16 = (ETHRLY16) data.get("ethrly16");
+        ethrly16.off(0);
     }
 }

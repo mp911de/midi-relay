@@ -1,6 +1,7 @@
 package de.paluch.midi.relay.job;
 
 import de.paluch.midi.relay.midi.MidiPlayer;
+import de.paluch.midi.relay.relay.ETHRLY16;
 import org.quartz.*;
 
 /**
@@ -14,7 +15,7 @@ public class SwitchOnJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getJobDetail().getJobDataMap();
-        MidiPlayer midiPlayer = (MidiPlayer) data.get("midiPlayer");
-        midiPlayer.play();
+        ETHRLY16 ethrly16 = (ETHRLY16) data.get("ethrly16");
+        ethrly16.on(0);
     }
 }

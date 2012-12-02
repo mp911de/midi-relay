@@ -15,6 +15,6 @@ public class PlayJob implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         MidiPlayer midiPlayer = (MidiPlayer) data.get("midiPlayer");
-        midiPlayer.play();
+        midiPlayer.play(null);
     }
 }

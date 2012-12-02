@@ -21,7 +21,6 @@ public class HttpControlInterface {
 
     private MidiPlayer midiPlayer;
     private ETHRLY16 midiReceiver;
-    private Scheduler scheduler;
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -33,25 +32,18 @@ public class HttpControlInterface {
     }
 
     @GET
-    @Path("schedule")
+    @Path("play")
     @Produces(MediaType.TEXT_PLAIN)
-    public String addSchedule(@QueryParam("cronExpression") String cronExpression) throws Exception {
-        if (cronExpression == null) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Empty " +
-                                                                                                          "cronExpression").build());
-        }
-
-        Trigger trigger = TriggerBuilder.newTrigger().forJob(PlayJob.class.getName()).withSchedule(CronScheduleBuilder
-                                                                                                           .cronSchedule(cronExpression)).build();
-        scheduler.scheduleJob(trigger);
+    public String play() throws Exception {
+        midiPlayer.play(null);
         return "OK";
     }
 
     @GET
-    @Path("play")
+    @Path("play/{filename}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String play() throws Exception {
-        midiPlayer.play();
+    public String play(@PathParam("filename") String filename) throws Exception {
+        midiPlayer.play(filename);
         return "OK";
     }
 
@@ -107,13 +99,11 @@ public class HttpControlInterface {
     public String addInputDevice(@PathParam("id") int id) throws Exception {
 
         MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
-        MidiDevice device= MidiSystem.getMidiDevice(infos[id]);
-
+        MidiDevice device = MidiSystem.getMidiDevice(infos[id]);
 
 
         device.getTransmitter().setReceiver(MidiInstance.getInstance().getReceiver());
-        if(!device.isOpen())
-        {
+        if (!device.isOpen()) {
             device.open();
         }
         return "OK";
@@ -136,11 +126,4 @@ public class HttpControlInterface {
         this.midiReceiver = midiReceiver;
     }
 
-    public Scheduler getScheduler() {
-        return scheduler;
-    }
-
-    public void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
 }

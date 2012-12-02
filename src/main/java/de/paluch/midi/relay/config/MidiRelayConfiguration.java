@@ -12,44 +12,10 @@ import java.util.List;
 @XmlRootElement(name = "midiRelayConfiguration")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class MidiRelayConfiguration {
-    private String timerCronExpression;
-    private String midiDirectory;
-    private String ethrlyHostname;
-    private int ethrlyPort;
 
     private List<MidiChannelMap> channel;
 
-    public String getTimerCronExpression() {
-        return timerCronExpression;
-    }
 
-    public void setTimerCronExpression(String timerCronExpression) {
-        this.timerCronExpression = timerCronExpression;
-    }
-
-    public String getMidiDirectory() {
-        return midiDirectory;
-    }
-
-    public void setMidiDirectory(String midiDirectory) {
-        this.midiDirectory = midiDirectory;
-    }
-
-    public String getEthrlyHostname() {
-        return ethrlyHostname;
-    }
-
-    public void setEthrlyHostname(String ethrlyHostname) {
-        this.ethrlyHostname = ethrlyHostname;
-    }
-
-    public int getEthrlyPort() {
-        return ethrlyPort;
-    }
-
-    public void setEthrlyPort(int ethrlyPort) {
-        this.ethrlyPort = ethrlyPort;
-    }
 
     public List<MidiChannelMap> getChannel() {
         return channel;

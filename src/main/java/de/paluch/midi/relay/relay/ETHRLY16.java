@@ -38,9 +38,8 @@ public class ETHRLY16{
     public final static int ALL_ON = 100;
     public final static int ALL_OFF = 110;
 
-    public ETHRLY16(String hostname, int port) {
-        this.hostname = hostname;
-        this.port = port;
+    public ETHRLY16() {
+
     }
 
 
@@ -127,5 +126,23 @@ public class ETHRLY16{
     }
 
 
+    public long getBytesSent() {
+        return bytesSent;
+    }
 
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 }

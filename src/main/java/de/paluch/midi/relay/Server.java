@@ -9,6 +9,8 @@ import de.paluch.midi.relay.http.HttpControlInterface;
 import de.paluch.midi.relay.http.RsApplication;
 import de.paluch.midi.relay.job.ConnectionWatchdogJob;
 import de.paluch.midi.relay.job.PlayJob;
+import de.paluch.midi.relay.job.SwitchOffJob;
+import de.paluch.midi.relay.job.SwitchOnJob;
 import de.paluch.midi.relay.midi.MidiInstance;
 import de.paluch.midi.relay.midi.MidiPlayer;
 import de.paluch.midi.relay.midi.MidiRelayReceiver;
@@ -16,6 +18,9 @@ import de.paluch.midi.relay.midi.MultiTargetReceiver;
 import de.paluch.midi.relay.relay.ETHRLY16;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.sound.midi.*;
 import javax.xml.bind.JAXB;
@@ -31,11 +36,22 @@ public class Server {
 
     private static Server instance;
 
-    private ETHRLY16 ethrly16;
     private RsApplication rsApplication;
+    private AbstractXmlApplicationContext context;
 
     private boolean active = true;
     private boolean shutdown = false;
+
+    private Server(String configFile) throws Exception {
+
+
+        context = new ClassPathXmlApplicationContext("spring-ctx.xml");
+        HttpControlInterface http = (HttpControlInterface) context.getBean("http");
+
+        rsApplication = new RsApplication();
+        rsApplication.setObjects((Set) Collections.singleton(http));
+
+    }
 
 
     public static void main(String args[]) throws Exception {
@@ -88,7 +104,7 @@ public class Server {
         System.out.println("http://localhost:9595/player/stop to stop");
         System.out.println("http://localhost:9595/player/ to get the current state (running/stopped)");
         System.out.println("http://localhost:9595/player/device?id&state set MIDI receiver state");
-        System.out.println("http://localhost:9595/player/schedule?cronExpression to add a schedule");
+        System.out.println("http://localhost:9595/player/port/{port:0-8}/{state:ON|OFF} to control port state");
 
         while (active) {
             Thread.sleep(500);
@@ -104,75 +120,10 @@ public class Server {
 
         MidiInstance.getInstance().getReceiver().close();
         MidiInstance.getInstance().getSequencer().close();
+
+        context.close();
     }
 
-    private Server(String configFile) throws Exception {
-
-        MidiRelayConfiguration config = JAXB.unmarshal(new File(configFile), MidiRelayConfiguration.class);
-        ethrly16 = new ETHRLY16(config.getEthrlyHostname(), config.getEthrlyPort());
-
-        Sequencer seq = setupSequencer(config);
-        MidiInstance.getInstance().setSequencer(seq);
-
-
-        MidiPlayer midiPlayer = new MidiPlayer(config.getMidiDirectory(), seq, ethrly16);
-
-
-        Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-        addMidiPlayerJob(midiPlayer, scheduler);
-        addConnectionWatchdogJob(ethrly16, scheduler);
-
-        HttpControlInterface hci = setupControlInterface(midiPlayer, scheduler);
-
-        rsApplication = new RsApplication();
-        rsApplication.setObjects((Set) Collections.singleton(hci));
-        hci.addSchedule(config.getTimerCronExpression());
-
-        ethrly16.on(0);
-
-        scheduler.start();
-
-    }
-
-    private HttpControlInterface setupControlInterface(MidiPlayer midiPlayer, Scheduler scheduler) {
-        HttpControlInterface hci = new HttpControlInterface();
-        hci.setScheduler(scheduler);
-        hci.setMidiPlayer(midiPlayer);
-        hci.setMidiReceiver(ethrly16);
-        return hci;
-    }
-
-    private Sequencer setupSequencer(MidiRelayConfiguration config) throws MidiUnavailableException {
-        MidiRelayReceiver midiRelayReceiver = new MidiRelayReceiver(ethrly16);
-        midiRelayReceiver.setChannelMap(config.getChannel());
-
-
-        Sequencer seq = MidiSystem.getSequencer(false);
-        Transmitter transmitter = seq.getTransmitter();
-        MultiTargetReceiver multiTargetReceiver = MidiInstance.getInstance().getReceiver();
-        Receiver systemReceiver = MidiSystem.getReceiver();
-
-        transmitter.setReceiver(multiTargetReceiver);
-
-        multiTargetReceiver.addReceiver(systemReceiver);
-        multiTargetReceiver.addReceiver(midiRelayReceiver);
-
-        seq.open();
-        return seq;
-    }
-
-    private void addMidiPlayerJob(MidiPlayer midiPlayer, Scheduler scheduler) throws SchedulerException {
-        JobDetail detail = JobBuilder.newJob(PlayJob.class).withIdentity(PlayJob.class.getName()).build();
-        detail.getJobDataMap().put("midiPlayer", midiPlayer);
-        scheduler.addJob(detail, true);
-    }
-
-    private void addConnectionWatchdogJob(ETHRLY16 ethrly16, Scheduler scheduler) throws SchedulerException {
-        JobDetail detail = JobBuilder.newJob(ConnectionWatchdogJob.class).withIdentity(ConnectionWatchdogJob.class.getName())
-                                     .build();
-        detail.getJobDataMap().put("ethrly16", ethrly16);
-        scheduler.addJob(detail, true);
-    }
 
     public static Server getInstance() {
         return instance;
