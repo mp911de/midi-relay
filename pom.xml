@@ -7,6 +7,18 @@
     <groupId>biz.paluch</groupId>
     <artifactId>midi-relay-controller</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
@@ -69,6 +81,7 @@
             <version>3.1.3.RELEASE</version>
         </dependency>
 
-
     </dependencies>
+
+
 </project>
