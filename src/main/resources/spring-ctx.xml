@@ -64,7 +64,7 @@
         <property name="jobClass" value="de.paluch.midi.relay.job.PlayJob"/>
         <property name="jobDataAsMap">
             <map>
-                <entry key="ethrly16" value-ref="ethrly16"/>
+                <entry key="midiPlayer" value-ref="midiPlayer"/>
             </map>
         </property>
     </bean>
