@@ -19,7 +19,7 @@ import java.util.Map;
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 08.11.12 19:59
  */
-public class ETHRLY16{
+public class ETHRLY16 {
 
     public static final int CONNECT_TIMEOUT_MS = 1000;
     public static final int READ_TIMEOUT_MS = 1000;
@@ -41,7 +41,6 @@ public class ETHRLY16{
     public ETHRLY16() {
 
     }
-
 
 
     private void checkOrInit() {
@@ -96,7 +95,9 @@ public class ETHRLY16{
 
     public void keepaliveOrClose() {
         if (socket != null) {
-            if (lastSendTimestamp + connectionKeepAlive < System.currentTimeMillis()) {
+            long unused = System.currentTimeMillis() - lastSendTimestamp;
+            if (unused > connectionKeepAlive) {
+                log.info("Closing socket because of inactivity since " + unused + "ms");
                 close();
             }
         }

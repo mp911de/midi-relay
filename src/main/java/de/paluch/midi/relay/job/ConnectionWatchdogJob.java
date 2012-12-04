@@ -19,7 +19,6 @@ public class ConnectionWatchdogJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
-        log.info("keepaliveOrClose");
         JobDataMap data = context.getJobDetail().getJobDataMap();
         ETHRLY16 ethrly16 = (ETHRLY16) data.get("ethrly16");
         ethrly16.keepaliveOrClose();

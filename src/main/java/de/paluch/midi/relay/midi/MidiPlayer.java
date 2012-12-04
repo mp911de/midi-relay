@@ -88,6 +88,7 @@ public class MidiPlayer {
 
         receiver.on(0);
 
+        run = false;
     }
 
     public boolean isRunning() {
