@@ -64,6 +64,7 @@ public class ETHRLY16 implements RemoteRelayReceiver
 
         } catch (IOException e)
         {
+            log.warn(e.getMessage(), e);
             try
             {
                 if (socketChannel != null)
@@ -73,7 +74,7 @@ public class ETHRLY16 implements RemoteRelayReceiver
             } catch (IOException e1)
             {
             }
-            log.warn(e.getMessage(), e);
+
         } catch (InterruptedException e)
         {
             e.printStackTrace();
@@ -133,7 +134,7 @@ public class ETHRLY16 implements RemoteRelayReceiver
 
                 ByteBuffer buf = ByteBuffer.allocate(1);
                 buf.clear();
-                buf.putInt(command);
+                buf.put((byte) command);
 
                 buf.flip();
 
@@ -146,7 +147,7 @@ public class ETHRLY16 implements RemoteRelayReceiver
             }
         } catch (Exception e)
         {
-            log.warn(e.getMessage());
+            log.warn(e.toString());
         }
     }
 
