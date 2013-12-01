@@ -3,6 +3,7 @@ package de.paluch.midi.relay;
 import com.sun.net.httpserver.HttpServer;
 import de.paluch.midi.relay.config.MidiRelayConfiguration;
 import de.paluch.midi.relay.http.HttpControlInterface;
+import de.paluch.midi.relay.http.NotFoundExceptionMapper;
 import de.paluch.midi.relay.http.RsApplication;
 import de.paluch.midi.relay.job.ConnectionWatchdogJob;
 import de.paluch.midi.relay.job.PlayJob;
@@ -25,7 +26,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import javax.sound.midi.*;
 import javax.xml.bind.JAXB;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -49,7 +52,7 @@ public class Server
         HttpControlInterface http = (HttpControlInterface) context.getBean("http");
 
         rsApplication = new RsApplication();
-        rsApplication.setObjects((Set) Collections.singleton(http));
+        rsApplication.setObjects((Set) new HashSet(Arrays.asList(http, new NotFoundExceptionMapper())));
 
     }
 
