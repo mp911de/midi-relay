@@ -1,6 +1,6 @@
 package de.paluch.midi.relay.job;
 
-import de.paluch.midi.relay.relay.ETHRLY16;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import org.quartz.*;
 
 /**
@@ -14,7 +14,7 @@ public class SwitchOffJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getJobDetail().getJobDataMap();
-        ETHRLY16 ethrly16 = (ETHRLY16) data.get("ethrly16");
-        ethrly16.off(0);
+        RemoteRelayReceiver remoteRelayReceiver = (RemoteRelayReceiver) data.get("remoteRelayReceiver");
+        remoteRelayReceiver.off(0);
     }
 }

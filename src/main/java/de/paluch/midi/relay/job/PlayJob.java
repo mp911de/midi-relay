@@ -1,6 +1,7 @@
 package de.paluch.midi.relay.job;
 
 import de.paluch.midi.relay.midi.MidiPlayer;
+import de.paluch.midi.relay.midi.PlayerState;
 import org.quartz.*;
 
 /**
@@ -8,13 +9,23 @@ import org.quartz.*;
  * @since 09.11.12 19:44
  */
 @DisallowConcurrentExecution
-public class PlayJob implements Job {
-
+public class PlayJob implements Job
+{
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        JobDataMap data = context.getJobDetail().getJobDataMap();
+    public void execute(JobExecutionContext context) throws JobExecutionException
+    {
+        JobDataMap data = context.getMergedJobDataMap();
         MidiPlayer midiPlayer = (MidiPlayer) data.get("midiPlayer");
-        midiPlayer.play(null);
+        PlayerState request = (PlayerState) data.get("request");
+
+        if (request == null)
+        {
+
+            midiPlayer.play((String) null);
+        } else
+        {
+            midiPlayer.play(request);
+        }
     }
 }

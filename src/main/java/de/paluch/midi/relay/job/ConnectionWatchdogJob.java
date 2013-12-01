@@ -1,6 +1,6 @@
 package de.paluch.midi.relay.job;
 
-import de.paluch.midi.relay.relay.ETHRLY16;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -20,7 +20,7 @@ public class ConnectionWatchdogJob implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
         JobDataMap data = context.getJobDetail().getJobDataMap();
-        ETHRLY16 ethrly16 = (ETHRLY16) data.get("ethrly16");
-        ethrly16.keepaliveOrClose();
+        RemoteRelayReceiver remoteRelayReceiver = (RemoteRelayReceiver) data.get("remoteRelayReceiver");
+        remoteRelayReceiver.keepaliveOrClose();
     }
 }

@@ -1,8 +1,5 @@
 package de.paluch.midi.relay;
 
-import com.sun.jersey.api.container.httpserver.HttpServerFactory;
-import com.sun.jersey.api.core.ApplicationAdapter;
-import com.sun.jersey.core.impl.provider.entity.StringProvider;
 import com.sun.net.httpserver.HttpServer;
 import de.paluch.midi.relay.config.MidiRelayConfiguration;
 import de.paluch.midi.relay.http.HttpControlInterface;
@@ -16,6 +13,9 @@ import de.paluch.midi.relay.midi.MidiPlayer;
 import de.paluch.midi.relay.midi.MidiRelayReceiver;
 import de.paluch.midi.relay.midi.MultiTargetReceiver;
 import de.paluch.midi.relay.relay.ETHRLY16;
+import org.jboss.resteasy.plugins.server.netty.NettyJaxrsServer;
+import org.jboss.resteasy.spi.ResteasyDeployment;
+import org.jboss.resteasy.test.TestPortProvider;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.context.ApplicationContext;
@@ -31,8 +31,8 @@ import java.util.Set;
 /**
  * Server Initiator.
  */
-public class Server {
-
+public class Server
+{
 
     private static Server instance;
 
@@ -42,8 +42,8 @@ public class Server {
     private boolean active = true;
     private boolean shutdown = false;
 
-    private Server(String configFile) throws Exception {
-
+    private Server(String configFile) throws Exception
+    {
 
         context = new ClassPathXmlApplicationContext("spring-ctx.xml");
         HttpControlInterface http = (HttpControlInterface) context.getBean("http");
@@ -53,14 +53,22 @@ public class Server {
 
     }
 
+    public static void main(String args[]) throws Exception
+    {
 
-    public static void main(String args[]) throws Exception {
-
-        if (args.length == 0) {
+        if (args.length == 0)
+        {
             System.out.println("Usage: Server CONFIG FILE NAME");
             return;
         }
         System.out.println("using config " + args[0]);
+
+        MidiDevice.Info[] devices = MidiSystem.getMidiDeviceInfo();
+        System.out.println("Available Devices");
+        for (MidiDevice.Info device : devices)
+        {
+            System.out.println("   " + device.getName() + "/" + device.getDescription() + "/" + device.getVendor());
+        }
 
         instance = new Server(args[0]);
         instance.installShutdownHook();
@@ -68,64 +76,86 @@ public class Server {
         instance.close();
     }
 
-    private void installShutdownHook() {
+    private void installShutdownHook()
+    {
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        Runtime.getRuntime().addShutdownHook(new Thread()
+        {
 
             @Override
-            public void run() {
+            public void run()
+            {
                 instance.active = false;
 
                 System.out.println("Stopping server");
-                try {
-                    while (!instance.shutdown) {
+                try
+                {
+                    while (!instance.shutdown)
+                    {
                         Thread.sleep(100);
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException e)
+                {
 
                 }
             }
         });
     }
 
-    private void run() throws Exception {
+    private void run() throws Exception
+    {
+        ResteasyDeployment deployment = new ResteasyDeployment();
+        deployment.setApplication(rsApplication);
+        NettyJaxrsServer netty = new NettyJaxrsServer();
+        netty.setDeployment(deployment);
 
+        int port = (Integer) context.getBean("serverPort");
 
-        ApplicationAdapter adapter = new ApplicationAdapter(rsApplication);
-        adapter.getProviderClasses().add(StringProvider.class);
-
-
-        HttpServer server = HttpServerFactory.create("http://localhost:9595/", adapter);
-        server.start();
+        netty.setPort(port);
+        netty.setRootResourcePath("");
+        netty.setSecurityDomain(null);
+        netty.start();
 
         System.out.println("Server running");
         System.out.println("Visit:");
-        System.out.println("http://localhost:9595/player/play to play");
-        System.out.println("http://localhost:9595/player/stop to stop");
-        System.out.println("http://localhost:9595/player/ to get the current state (running/stopped)");
-        System.out.println("http://localhost:9595/player/device?id&state set MIDI receiver state");
-        System.out.println("http://localhost:9595/player/port/{port:0-8}/{state:ON|OFF} to control port state");
+        String hostPart = RuntimeContainer.FQDN_HOSTNAME + ":" + port;
 
-        while (active) {
+        System.out.println("GET http://" + hostPart + "/player/ to retrieve the current status");
+        System.out.println("GET http://" + hostPart + "/player/play to play");
+        System.out.println("PUT http://" + hostPart + "/player/play to play uploaded midi data");
+        System.out.println("GET http://" + hostPart + "/player/stop to stop");
+        System.out.println("GET http://" + hostPart + "/player/ to get the current state (running/stopped)");
+        System.out.println("GET http://" + hostPart +
+                                   "/player/device?id&state set MIDI receiver state");
+        System.out.println("GET http://" + hostPart + "/player/port/{port:0-8}/{state:ON|OFF} to control port state");
+
+        while (active)
+        {
             Thread.sleep(500);
         }
 
-
-        server.stop(0);
+        netty.stop();
         shutdown = true;
         System.out.println("Server stopped");
     }
 
-    private void close() {
+    private void close()
+    {
+        if (MidiInstance.getInstance().getReceiver() != null)
+        {
+            MidiInstance.getInstance().getReceiver().close();
+        }
 
-        MidiInstance.getInstance().getReceiver().close();
-        MidiInstance.getInstance().getSequencer().close();
+        if (MidiInstance.getInstance().getSequencer() != null)
+        {
+            MidiInstance.getInstance().getSequencer().close();
+        }
 
         context.close();
     }
 
-
-    public static Server getInstance() {
+    public static Server getInstance()
+    {
         return instance;
     }
 
