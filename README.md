@@ -6,12 +6,13 @@ Just start the class `de.paluch.midi.relay.Server` and adjust the config `config
 
 Then you can call following URL's to control the whole machine:
 
-* GET http://dxkrew4fasdft32x.fritz.box:9595/player/ to retrieve the current status
-* GET http://dxkrew4fasdft32x.fritz.box:9595/player/play to play
-* PUT http://dxkrew4fasdft32x.fritz.box:9595/player/play to play uploaded midi data
-* GET http://dxkrew4fasdft32x.fritz.box:9595/player/stop to stop
-* GET http://dxkrew4fasdft32x.fritz.box:9595/player/ to get the current state (running/stopped)
-* GET http://dxkrew4fasdft32x.fritz.box:9595/player/device?id&state set MIDI receiver state
-* GET http://dxkrew4fasdft32x.fritz.box:9595/player/port/{port:0-8}/{state:ON|OFF} to control port state
+* GET http://localhost:9595/player/ to retrieve the current status
+* GET http://localhost:9595/player/play to play
+* PUT http://localhost:9595/player/play to play uploaded midi data
+* GET http://localhost:9595/player/stop to stop
+* GET http://localhost:9595/player/ to get the current state (running/stopped)
+* GET http://localhost:9595/player/port/{port:0-8}/{state:ON|OFF} to control port state
+* GET http://localhost:9595/player/devices get a list of all devices
+* GET http://localhost:9595/player/devices/{id}/to/device to connect an in-device to the out device (relay)
 
 This code is experimental.

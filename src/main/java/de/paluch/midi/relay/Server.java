@@ -1,33 +1,17 @@
 package de.paluch.midi.relay;
 
-import com.sun.net.httpserver.HttpServer;
-import de.paluch.midi.relay.config.MidiRelayConfiguration;
 import de.paluch.midi.relay.http.HttpControlInterface;
 import de.paluch.midi.relay.http.NotFoundExceptionMapper;
 import de.paluch.midi.relay.http.RsApplication;
-import de.paluch.midi.relay.job.ConnectionWatchdogJob;
-import de.paluch.midi.relay.job.PlayJob;
-import de.paluch.midi.relay.job.SwitchOffJob;
-import de.paluch.midi.relay.job.SwitchOnJob;
 import de.paluch.midi.relay.midi.MidiInstance;
-import de.paluch.midi.relay.midi.MidiPlayer;
-import de.paluch.midi.relay.midi.MidiRelayReceiver;
-import de.paluch.midi.relay.midi.MultiTargetReceiver;
-import de.paluch.midi.relay.relay.ETHRLY16;
 import org.jboss.resteasy.plugins.server.netty.NettyJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
-import org.jboss.resteasy.test.TestPortProvider;
-import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import javax.sound.midi.*;
-import javax.xml.bind.JAXB;
-import java.io.File;
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -128,9 +112,10 @@ public class Server
         System.out.println("PUT http://" + hostPart + "/player/play to play uploaded midi data");
         System.out.println("GET http://" + hostPart + "/player/stop to stop");
         System.out.println("GET http://" + hostPart + "/player/ to get the current state (running/stopped)");
-        System.out.println("GET http://" + hostPart +
-                                   "/player/device?id&state set MIDI receiver state");
         System.out.println("GET http://" + hostPart + "/player/port/{port:0-8}/{state:ON|OFF} to control port state");
+        System.out.println("GET http://" + hostPart + "/player/devices/{id} get a list of all devices (xml format)");
+        System.out.println("GET http://" + hostPart +
+                                   "/player/devices/{id}/to/relay to connect an in-device to the out device (relay)");
 
         while (active)
         {

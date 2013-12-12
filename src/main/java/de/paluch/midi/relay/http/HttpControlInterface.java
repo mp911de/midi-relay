@@ -1,21 +1,32 @@
 package de.paluch.midi.relay.http;
 
-import com.google.common.io.ByteStreams;
-import de.paluch.midi.relay.job.PlayJob;
-import de.paluch.midi.relay.midi.PlayerState;
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import de.paluch.midi.relay.midi.MidiInstance;
 import de.paluch.midi.relay.midi.MidiPlayer;
+import de.paluch.midi.relay.midi.PlayerState;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
-import javax.ws.rs.*;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.Transmitter;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.io.InputStream;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -28,6 +39,7 @@ public class HttpControlInterface
     private MidiPlayer midiPlayer;
     private RemoteRelayReceiver remoteRelayReceiver;
     private Scheduler scheduler;
+    private Map<Integer, MidiDevice> deviceMap = new ConcurrentHashMap<Integer, MidiDevice>();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -146,36 +158,84 @@ public class HttpControlInterface
     }
 
     @GET
-    @Path("in-devices/")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String setActive() throws Exception
+    @Path("devices/")
+    @Produces({ MediaType.TEXT_XML })
+    public MidiDeviceInfosRepresentation getInputDevices() throws Exception
     {
-        StringBuffer sb = new StringBuffer();
-
+        MidiDeviceInfosRepresentation result = new MidiDeviceInfosRepresentation();
         MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
+        int id = 0;
         for (MidiDevice.Info info : infos)
         {
-            sb.append(info.getName() + ", " + info.getDescription() + " (" + info.getVendor() + ")");
-            sb.append("\r\n");
+
+            MidiDeviceInfoRepresentation device = getMidiDeviceInfoRepresentation(id, info);
+            result.getDevices().add(device);
+            id++;
         }
-        return sb.toString();
+
+        return result;
+    }
+
+    private MidiDeviceInfoRepresentation getMidiDeviceInfoRepresentation(int id, MidiDevice.Info info)
+            throws MidiUnavailableException
+    {
+        MidiDeviceInfoRepresentation device = new MidiDeviceInfoRepresentation();
+        device.setId(id);
+        device.setName(info.getName() + ", " + info.getDescription() + " (" + info.getVendor() + ")");
+
+        MidiDevice midiDevice = MidiSystem.getMidiDevice(info);
+        if (midiDevice instanceof Receiver)
+        {
+            device.getTypes().add(MidiDeviceInfoRepresentation.Type.RECEIVER);
+        }
+        if (midiDevice instanceof Sequencer)
+        {
+            device.getTypes().add(MidiDeviceInfoRepresentation.Type.SEQUENCER);
+        }
+        if (midiDevice instanceof Transmitter)
+        {
+            device.getTypes().add(MidiDeviceInfoRepresentation.Type.TRANSMITTER);
+        }
+        if (midiDevice instanceof Synthesizer)
+        {
+            device.getTypes().add(MidiDeviceInfoRepresentation.Type.SYNTHESIZER);
+        }
+        if (midiDevice.getClass().getName().contains("MidiIn"))
+        {
+            device.getTypes().add(MidiDeviceInfoRepresentation.Type.IN);
+        }
+        if (midiDevice.getClass().getName().contains("MidiOut"))
+        {
+            device.getTypes().add(MidiDeviceInfoRepresentation.Type.OUT);
+        }
+
+        deviceMap.put(id, midiDevice);
+
+        return device;
     }
 
     @GET
-    @Path("in-devices/{id}")
+    @Path("devices/{id}/to/relay")
     @Produces(MediaType.TEXT_PLAIN)
     public String addInputDevice(@PathParam("id") int id) throws Exception
     {
 
-        MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
-        MidiDevice device = MidiSystem.getMidiDevice(infos[id]);
+        MidiDevice device = deviceMap.get(id);
+        if (device == null)
+        {
+            MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
+            device = MidiSystem.getMidiDevice(infos[id]);
+            deviceMap.put(id, device);
+        }
 
         device.getTransmitter().setReceiver(MidiInstance.getInstance().getReceiver());
+
         if (!device.isOpen())
         {
             device.open();
         }
-        return "OK";
+        return "ADDED";
+
     }
 
     public MidiPlayer getMidiPlayer()
