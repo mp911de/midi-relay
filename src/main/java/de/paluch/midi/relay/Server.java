@@ -113,7 +113,7 @@ public class Server
         System.out.println("GET http://" + hostPart + "/player/stop to stop");
         System.out.println("GET http://" + hostPart + "/player/ to get the current state (running/stopped)");
         System.out.println("GET http://" + hostPart + "/player/port/{port:0-8}/{state:ON|OFF} to control port state");
-        System.out.println("GET http://" + hostPart + "/player/devices/{id} get a list of all devices (xml format)");
+        System.out.println("GET http://" + hostPart + "/player/devices get a list of all devices (xml format)");
         System.out.println("GET http://" + hostPart +
                                    "/player/devices/{id}/to/relay to connect an in-device to the out device (relay)");
 

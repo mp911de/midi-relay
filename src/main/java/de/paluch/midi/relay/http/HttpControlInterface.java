@@ -158,7 +158,7 @@ public class HttpControlInterface
     }
 
     @GET
-    @Path("devices/")
+    @Path("devices")
     @Produces({ MediaType.TEXT_XML })
     public MidiDeviceInfosRepresentation getInputDevices() throws Exception
     {
