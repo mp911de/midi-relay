@@ -1,32 +1,22 @@
 package de.paluch.midi.relay.midi;
 
-import com.google.common.io.Files;
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
-import org.apache.log4j.Logger;
-
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MetaMessage;
-import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.Track;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
+
+import javax.sound.midi.*;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.io.Files;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 09.11.12 19:50
  */
-public class MidiPlayer
-{
+public class MidiPlayer {
 
     private Logger log = Logger.getLogger(getClass());
     private String midiDirectory;
@@ -35,41 +25,33 @@ public class MidiPlayer
     private boolean run = false;
     private PlayerState state;
 
-    public String getMidiDirectory()
-    {
+    public String getMidiDirectory() {
         return midiDirectory;
     }
 
-    public void setMidiDirectory(String midiDirectory)
-    {
+    public void setMidiDirectory(String midiDirectory) {
         this.midiDirectory = midiDirectory;
     }
 
-    public Sequencer getSequencer()
-    {
+    public Sequencer getSequencer() {
         return sequencer;
     }
 
-    public void setSequencer(Sequencer sequencer)
-    {
+    public void setSequencer(Sequencer sequencer) {
         this.sequencer = sequencer;
     }
 
-    public RemoteRelayReceiver getReceiver()
-    {
+    public RemoteRelayReceiver getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(RemoteRelayReceiver receiver)
-    {
+    public void setReceiver(RemoteRelayReceiver receiver) {
         this.receiver = receiver;
     }
 
-    public void play(PlayerState request)
-    {
+    public void play(PlayerState request) {
 
-        if (run)
-        {
+        if (run) {
             log.info("Already running");
             return;
         }
@@ -77,20 +59,15 @@ public class MidiPlayer
         run = true;
         receiver.off(0);
 
-        if (run)
-        {
-            try
-            {
+        if (run) {
+            try {
                 prepare(request);
                 playFile(request);
                 receiver.off(0);
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 log.warn(request.getFileName() + ": " + e.getMessage(), e);
-            } finally
-            {
-                if (state != null)
-                {
+            } finally {
+                if (state != null) {
                     state.setRunning(false);
                 }
             }
@@ -101,11 +78,9 @@ public class MidiPlayer
         run = false;
     }
 
-    public void play(String fileName)
-    {
+    public void play(String fileName) {
 
-        if (run)
-        {
+        if (run) {
             log.info("Already running");
             return;
         }
@@ -114,24 +89,18 @@ public class MidiPlayer
         File[] files = getFiles(fileName);
 
         receiver.off(0);
-        if (files != null)
-        {
+        if (files != null) {
             List<File> theFiles = Arrays.asList(files);
-            Collections.sort(theFiles, new Comparator<File>()
-            {
+            Collections.sort(theFiles, new Comparator<File>() {
                 @Override
-                public int compare(File o1, File o2)
-                {
+                public int compare(File o1, File o2) {
                     return o1.getName().compareToIgnoreCase(o2.getName());
                 }
             });
 
-            for (File theFile : theFiles)
-            {
-                if (run)
-                {
-                    try
-                    {
+            for (File theFile : theFiles) {
+                if (run) {
+                    try {
                         byte[] bytes = Files.asByteSource(theFile).read();
                         PlayerState state = new PlayerState();
                         state.setMidiContents(bytes);
@@ -140,13 +109,10 @@ public class MidiPlayer
                         prepare(state);
                         playFile(state);
                         receiver.off(0);
-                    } catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         log.warn(theFile.getName() + ": " + e.getMessage(), e);
-                    } finally
-                    {
-                        if (state != null)
-                        {
+                    } finally {
+                        if (state != null) {
                             state.setRunning(false);
                         }
                     }
@@ -158,15 +124,15 @@ public class MidiPlayer
 
         run = false;
     }
-    private void prepare(PlayerState state) throws InvalidMidiDataException, IOException, MidiUnavailableException
-    {
+
+    private void prepare(PlayerState state) throws InvalidMidiDataException, IOException, MidiUnavailableException {
         Sequence sequence = MidiSystem.getSequence(new ByteArrayInputStream(state.getMidiContents()));
         int durationInSecs = getDurationSecs(sequence);
         state.setDuration(durationInSecs);
         state.setSequenceName(getSequenceName(sequence));
     }
-    private int getDurationSecs(Sequence sequence) throws MidiUnavailableException, InvalidMidiDataException
-    {
+
+    private int getDurationSecs(Sequence sequence) throws MidiUnavailableException, InvalidMidiDataException {
         Sequencer sequencer = MidiSystem.getSequencer();
         sequencer.setSequence(sequence);
         int durationInSecs = (int) (sequencer.getMicrosecondLength() / 1000000.0);
@@ -174,29 +140,21 @@ public class MidiPlayer
         return durationInSecs;
     }
 
-    protected String getSequenceName(Sequence sequence)
-    {
-        for (Track track : sequence.getTracks())
-        {
-            for (int i = 0; i < track.size(); i++)
-            {
+    protected String getSequenceName(Sequence sequence) {
+        for (Track track : sequence.getTracks()) {
+            for (int i = 0; i < track.size(); i++) {
                 MidiEvent midiEvent = track.get(i);
-                if (midiEvent.getMessage() instanceof MetaMessage)
-                {
+                if (midiEvent.getMessage() instanceof MetaMessage) {
                     MidiMessageDetail detail = new MidiMessageDetail(midiEvent.getMessage());
 
-                    if (detail.getT2() == 3 || detail.getT2() == 6)
-                    {
-                        try
-                        {
-                            if (detail.getBytes()[0] == -1)
-                            {
+                    if (detail.getT2() == 3 || detail.getT2() == 6) {
+                        try {
+                            if (detail.getBytes()[0] == -1) {
                                 return new String(detail.getBytes(), 3, detail.getBytes().length - 3, "ASCII");
                             }
 
                             return new String(detail.getBytes(), "ASCII");
-                        } catch (UnsupportedEncodingException e)
-                        {
+                        } catch (UnsupportedEncodingException e) {
                         }
                     }
 
@@ -207,15 +165,12 @@ public class MidiPlayer
         return null;
     }
 
-    public boolean isRunning(long start, int duration)
-    {
-        if (run)
-        {
+    public boolean isRunning(long start, int duration) {
+        if (run) {
             long now = System.currentTimeMillis();
             long played = now - start;
             int playedSeconds = (int) played / 1000;
-            if (sequencer.isRunning() || playedSeconds < duration)
-            {
+            if (sequencer.isRunning() || playedSeconds < duration) {
                 return true;
             }
         }
@@ -223,8 +178,7 @@ public class MidiPlayer
         return false;
     }
 
-    private void playFile(PlayerState state) throws InvalidMidiDataException, IOException, InterruptedException
-    {
+    private void playFile(PlayerState state) throws InvalidMidiDataException, IOException, InterruptedException {
 
         this.state = state;
         int originalDuration = state.getDuration();
@@ -240,13 +194,10 @@ public class MidiPlayer
         long sequenceStarted = System.currentTimeMillis();
         sequencer.start();
 
-        while (isRunning(sequenceStarted, originalDuration))
-        {
-            try
-            {
+        while (isRunning(sequenceStarted, originalDuration)) {
+            try {
                 Thread.sleep(100);
-            } catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;
             }
@@ -259,8 +210,8 @@ public class MidiPlayer
         log.info("Finished file " + state.getSequenceName() + "/" + state.getFileName());
         log.info("Bytes sent: " + df.format(receiver.getBytesSent()));
     }
-    private DecimalFormat getFormatter()
-    {
+
+    private DecimalFormat getFormatter() {
         DecimalFormat df = new DecimalFormat();
         df.setMinimumFractionDigits(0);
         df.setMaximumFractionDigits(0);
@@ -270,26 +221,21 @@ public class MidiPlayer
         return df;
     }
 
-    private File[] getFiles(String fileName)
-    {
+    private File[] getFiles(String fileName) {
 
-        if (fileName == null)
-        {
+        if (fileName == null) {
             File file = new File(midiDirectory);
 
-            return file.listFiles(new FilenameFilter()
-            {
+            return file.listFiles(new FilenameFilter() {
                 @Override
-                public boolean accept(File dir, String name)
-                {
+                public boolean accept(File dir, String name) {
                     return name.toLowerCase().endsWith(".mid");
                 }
             });
         }
 
         File file = new File(midiDirectory, fileName);
-        if (file.exists())
-        {
+        if (file.exists()) {
             return new File[] { file };
         }
 
@@ -297,14 +243,12 @@ public class MidiPlayer
 
     }
 
-    public void stop()
-    {
+    public void stop() {
         sequencer.stop();
         run = false;
     }
 
-    public PlayerState getState()
-    {
+    public PlayerState getState() {
         return state;
     }
 }
