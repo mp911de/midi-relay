@@ -16,3 +16,12 @@ Then you can call following URL's to control the whole machine:
 * GET http://localhost:9595/player/devices/{id}/to/device to connect an in-device to the out device (relay)
 
 This code is experimental.
+
+Resources
+---------
+* [Controlling Christmas Lights using Midi](https://www.paluch.biz/blog/65-controlling-christmas-lights-using-midi.html)
+* [Controlling a relay via Midi](https://www.paluch.biz/blog/64-controlling-a-relay-via-midi.html)
+
+License
+-------
+* [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
