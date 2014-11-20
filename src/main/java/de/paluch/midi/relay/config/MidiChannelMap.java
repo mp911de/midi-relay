@@ -14,6 +14,9 @@ public class MidiChannelMap {
     @XmlAttribute(name = "id")
     private int channel;
 
+    @XmlAttribute(name = "device")
+    private String device;
+
     private List<String> note;
 
     public int getChannel() {
@@ -30,5 +33,13 @@ public class MidiChannelMap {
 
     public void setNote(List<String> note) {
         this.note = note;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 }

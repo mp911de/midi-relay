@@ -2,111 +2,123 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 
-    <context:property-placeholder location="file:config.properties"/>
+    <context:property-placeholder location="file:config.properties" />
 
     <bean id="serverPort" class="java.lang.Integer">
-        <constructor-arg value="${serverPort:9595}"/>
+        <constructor-arg value="${serverPort:9595}" />
     </bean>
 
     <bean id="http" class="de.paluch.midi.relay.http.HttpControlInterface">
-        <property name="midiPlayer" ref="midiPlayer"/>
-        <property name="remoteRelayReceiver" ref="remoteRelayReceiver"/>
-        <property name="scheduler" ref="quartzScheduler"/>
+        <property name="midiPlayer" ref="midiPlayer" />
+        <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
+        <property name="scheduler" ref="quartzScheduler" />
     </bean>
 
     <bean id="remoteRelayReceiver" class="de.paluch.midi.relay.relay.RemoteRelayReceiverWrapper">
-        <property name="delegate" ref="${device}"/>
+        <property name="delegate" ref="${device}" />
     </bean>
 
     <bean id="log" class="de.paluch.midi.relay.relay.LoggingRelayReceiver">
     </bean>
 
-    <bean id="ethrly16" class="de.paluch.midi.relay.relay.ETHRLY16">
-        <property name="hostname" value="${ethrlyHostname}"/>
-        <property name="port" value="${ethrlyPort}"/>
+    <bean id="ethrly16A" class="de.paluch.midi.relay.relay.ETHRLY16">
+        <property name="hostname" value="${ethrlyHostnameA}" />
+        <property name="port" value="${ethrlyPort}" />
+    </bean>
+
+    <bean id="ethrly16B" class="de.paluch.midi.relay.relay.ETHRLY16">
+        <property name="hostname" value="${ethrlyHostnameB}" />
+        <property name="port" value="${ethrlyPort}" />
     </bean>
 
     <bean id="channelMap" class="de.paluch.midi.relay.config.ChannelMapFactory">
-        <property name="configUrl" value="${midiMapping}"/>
+        <property name="configUrl" value="${midiMapping}" />
     </bean>
 
     <bean id="sequencer" class="de.paluch.midi.relay.midi.SequencerFactory">
-        <property name="remoteRelayReceiver" ref="remoteRelayReceiver"/>
-        <property name="channelMap" ref="channelMap"/>
+        <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
+        <property name="channelMap" ref="channelMap" />
     </bean>
 
     <bean id="midiPlayer" class="de.paluch.midi.relay.midi.MidiPlayer">
-        <property name="midiDirectory" value="${midiDirectory}"/>
-        <property name="receiver" ref="remoteRelayReceiver"/>
-        <property name="sequencer" ref="sequencer"/>
+        <property name="midiDirectory" value="${midiDirectory}" />
+        <property name="receiver" ref="remoteRelayReceiver" />
+        <property name="sequencer" ref="sequencer" />
     </bean>
 
+    <bean id="routingRelayReceiver" class="de.paluch.midi.relay.relay.RoutingRelayReceiverImpl">
+        <property name="channelMap" ref="channelMap" />
+    </bean>
 
     <bean name="switchOnJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="de.paluch.midi.relay.job.SwitchOnJob"/>
+        <property name="jobClass" value="de.paluch.midi.relay.job.SwitchOnJob" />
+        <property name="durability" value="true" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="remoteRelayReceiver" value-ref="remoteRelayReceiver"/>
+                <entry key="remoteRelayReceiver" value-ref="remoteRelayReceiver" />
             </map>
         </property>
     </bean>
 
-
     <bean name="switchOffJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="de.paluch.midi.relay.job.SwitchOffJob"/>
+        <property name="jobClass" value="de.paluch.midi.relay.job.SwitchOffJob" />
+        <property name="durability" value="true" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="remoteRelayReceiver" value-ref="remoteRelayReceiver"/>
+                <entry key="remoteRelayReceiver" value-ref="remoteRelayReceiver" />
             </map>
         </property>
     </bean>
 
     <bean name="playJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="de.paluch.midi.relay.job.PlayJob"/>
+        <property name="jobClass" value="de.paluch.midi.relay.job.PlayJob" />
+        <property name="durability" value="true" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="midiPlayer" value-ref="midiPlayer"/>
+                <entry key="midiPlayer" value-ref="midiPlayer" />
             </map>
         </property>
     </bean>
 
     <bean name="connectionWatchdog" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="de.paluch.midi.relay.job.ConnectionWatchdogJob"/>
+        <property name="jobClass" value="de.paluch.midi.relay.job.ConnectionWatchdogJob" />
+        <property name="durability" value="true" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="remoteRelayReceiver" value-ref="remoteRelayReceiver"/>
+                <entry key="remoteRelayReceiver" value-ref="remoteRelayReceiver" />
             </map>
         </property>
     </bean>
 
     <bean id="switchOnEarlyTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="switchOnJob"/>
-        <property name="cronExpression" value="0 0 5 * * ?"/>
+        <property name="jobDetail" ref="switchOnJob" />
+        <property name="cronExpression" value="0 0 5 * * ?" />
     </bean>
 
     <bean id="switchOffEarlyTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="switchOffJob"/>
-        <property name="cronExpression" value="0 0 8 * * ?"/>
+        <property name="jobDetail" ref="switchOffJob" />
+        <property name="cronExpression" value="0 0 8 * * ?" />
     </bean>
 
     <bean id="switchOffLateTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="switchOffJob"/>
-        <property name="cronExpression" value="0 0 20 * * ?"/>
+        <property name="jobDetail" ref="switchOffJob" />
+        <property name="cronExpression" value="0 0 20 * * ?" />
     </bean>
 
     <bean id="playTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="playJob"/>
-        <property name="cronExpression" value="${timerCronExpression}"/>
+        <property name="jobDetail" ref="playJob" />
+        <property name="cronExpression" value="${timerCronExpression}" />
     </bean>
 
     <bean id="connectionWatchdogTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
-        <property name="jobDetail" ref="connectionWatchdog"/>
-        <property name="startDelay" value="10000"/>
-        <property name="repeatInterval" value="360000"/>
+        <property name="jobDetail" ref="connectionWatchdog" />
+        <property name="startDelay" value="10000" />
+        <property name="repeatInterval" value="360000" />
     </bean>
 
 
@@ -114,11 +126,19 @@
     <bean id="quartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-                <ref bean="connectionWatchdogTrigger"/>
-                <ref bean="switchOnEarlyTrigger"/>
+                <ref bean="connectionWatchdogTrigger" />
+                <!-- <ref bean="switchOnEarlyTrigger"/>
                 <ref bean="switchOffEarlyTrigger"/>
                 <ref bean="switchOffLateTrigger"/>
-                <ref bean="playTrigger"/>
+                <ref bean="playTrigger"/> -->
+            </list>
+        </property>
+
+        <property name="jobDetails">
+            <list>
+                <ref bean="playJob" />
+                <ref bean="switchOnJob" />
+                <ref bean="switchOffJob" />
             </list>
         </property>
         <property name="quartzProperties">

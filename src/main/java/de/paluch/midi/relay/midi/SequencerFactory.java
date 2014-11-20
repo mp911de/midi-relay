@@ -18,8 +18,7 @@ import java.util.List;
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 02.12.12 13:44
  */
-public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements DisposableBean
-{
+public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements DisposableBean {
     private Logger log = Logger.getLogger(getClass());
     private RemoteRelayReceiver remoteRelayReceiver;
     private String deviceFilter = null;
@@ -27,14 +26,12 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
     private List<MidiChannelMap> channelMap;
 
     @Override
-    public Class<?> getObjectType()
-    {
+    public Class<?> getObjectType() {
         return Sequencer.class;
     }
 
     @Override
-    protected Sequencer createInstance() throws Exception
-    {
+    protected Sequencer createInstance() throws Exception {
 
         MidiRelayReceiver midiRelayReceiver = new MidiRelayReceiver(remoteRelayReceiver);
         midiRelayReceiver.setChannelMap(channelMap);
@@ -47,25 +44,21 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
 
         multiTargetReceiver.addReceiver(midiRelayReceiver);
 
-        if (!StringUtils.hasText(deviceFilter))
-        {
+        if (!StringUtils.hasText(deviceFilter)) {
             Receiver systemReceiver = MidiSystem.getReceiver();
             multiTargetReceiver.addReceiver(systemReceiver);
 
-        } else
-        {
+        } else {
             MidiDevice.Info[] midiDeviceInfo = MidiSystem.getMidiDeviceInfo();
-            for (MidiDevice.Info info : midiDeviceInfo)
-            {
-                if (deviceFilter.contains(info.getName()))
-                {
+            for (MidiDevice.Info info : midiDeviceInfo) {
+                if (deviceFilter.contains(info.getName())) {
                     MidiDevice midiDevice = MidiSystem.getMidiDevice(info);
-                    if (midiDevice instanceof Receiver)
-                    {
+                    if (midiDevice instanceof Receiver) {
+                        log.info("Adding receiver" + info.getName());
+
                         multiTargetReceiver.addReceiver((Receiver) midiDevice);
 
-                    } else
-                    {
+                    } else {
                         log.warn("Device " + info.getName() + " is not a receiver.");
                     }
                 }
@@ -78,41 +71,34 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
     }
 
     @Override
-    protected void destroyInstance(Sequencer instance) throws Exception
-    {
+    protected void destroyInstance(Sequencer instance) throws Exception {
 
-        if (instance.isOpen())
-        {
+        if (instance.isOpen()) {
             instance.close();
         }
     }
 
-    public RemoteRelayReceiver getRemoteRelayReceiver()
-    {
+    public RemoteRelayReceiver getRemoteRelayReceiver() {
         return remoteRelayReceiver;
     }
 
-    public void setRemoteRelayReceiver(RemoteRelayReceiver remoteRelayReceiver)
-    {
+    public void setRemoteRelayReceiver(RemoteRelayReceiver remoteRelayReceiver) {
         this.remoteRelayReceiver = remoteRelayReceiver;
     }
 
-    public List<MidiChannelMap> getChannelMap()
-    {
+    public List<MidiChannelMap> getChannelMap() {
         return channelMap;
     }
 
-    public void setChannelMap(List<MidiChannelMap> channelMap)
-    {
+    public void setChannelMap(List<MidiChannelMap> channelMap) {
         this.channelMap = channelMap;
     }
 
-    public String getDeviceFilter()
-    {
+    public String getDeviceFilter() {
         return deviceFilter;
     }
-    public void setDeviceFilter(String deviceFilter)
-    {
+
+    public void setDeviceFilter(String deviceFilter) {
         this.deviceFilter = deviceFilter;
     }
 }
