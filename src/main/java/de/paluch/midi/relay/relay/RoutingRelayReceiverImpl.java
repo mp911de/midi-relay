@@ -89,15 +89,13 @@ public class RoutingRelayReceiverImpl implements RoutingRelayReceiver, RemoteRel
         for (MidiChannelMap midiChannelMap : channelMap) {
             if (midiChannelMap.getNote().contains(note)) {
                 RemoteRelayReceiver routingRelayReceiver = devices.get(midiChannelMap.getDevice());
-                if (routingRelayReceiver != null)
-                {
+                if (routingRelayReceiver != null) {
                     routingRelayReceiver.on(midiChannelMap.getChannel());
                 } else {
                     log.warn("Cannot resolve device " + midiChannelMap.getDevice());
                 }
             }
         }
-
     }
 
     public void off(String note) {

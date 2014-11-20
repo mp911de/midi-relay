@@ -2,7 +2,6 @@
     <!-- "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" -->
     <channel id="1" device="ethrly16A">
         <note>C</note>
-        <note></note>
     </channel>
 
     <channel id="2" device="ethrly16A">
@@ -58,4 +57,5 @@
 
     <channel id="7" device="ethrly16B">
     </channel>
+
 </midiMapping>

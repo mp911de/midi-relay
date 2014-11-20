@@ -29,8 +29,12 @@ public class MidiRelayReceiver implements Receiver {
     @Override
     public void send(MidiMessage message, long timeStamp) {
 
-        if (!(message instanceof MetaMessage)) {
-            processMessage(message);
+        try {
+            if (!(message instanceof MetaMessage)) {
+                processMessage(message);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
 
     }
@@ -49,6 +53,7 @@ public class MidiRelayReceiver implements Receiver {
             // drum channel, we skip that guy.
             return;
         }
+
         if (hi == MidiHelper.NOTE_ON || hi == MidiHelper.NOTE_OFF) {
 
             int noteValue = MidiHelper.getNoteValue(t2);
@@ -56,21 +61,23 @@ public class MidiRelayReceiver implements Receiver {
             String theNote = MidiHelper.getNote(t2).toUpperCase();
 
             Integer outputChannel = channelMap.get(theNote);
-            if (outputChannel != null) {
-                if (hi == MidiHelper.NOTE_ON && t3 > 2) {
-                    if (remoteRelayReceiver instanceof RoutingRelayReceiver) {
-                        RoutingRelayReceiver routingRelayReceiverImpl = (RoutingRelayReceiver) remoteRelayReceiver;
-                        routingRelayReceiverImpl.on(theNote);
-                    } else {
-                        remoteRelayReceiver.on(outputChannel);
-                    }
-                } else if (hi == MidiHelper.NOTE_OFF || (hi == MidiHelper.NOTE_ON && t3 <= 2)) {
-                    if (remoteRelayReceiver instanceof RoutingRelayReceiver) {
-                        RoutingRelayReceiver routingRelayReceiverImpl = (RoutingRelayReceiver) remoteRelayReceiver;
-                        routingRelayReceiverImpl.off(theNote);
-                    } else {
-                        remoteRelayReceiver.off(outputChannel);
-                    }
+            if (outputChannel == null) {
+                return;
+            }
+
+            if (hi == MidiHelper.NOTE_ON && t3 > 2) {
+                if (remoteRelayReceiver instanceof RoutingRelayReceiver) {
+                    RoutingRelayReceiver routingRelayReceiverImpl = (RoutingRelayReceiver) remoteRelayReceiver;
+                    routingRelayReceiverImpl.on(theNote);
+                } else {
+                    remoteRelayReceiver.on(outputChannel);
+                }
+            } else if (hi == MidiHelper.NOTE_OFF || (hi == MidiHelper.NOTE_ON && t3 <= 2)) {
+                if (remoteRelayReceiver instanceof RoutingRelayReceiver) {
+                    RoutingRelayReceiver routingRelayReceiverImpl = (RoutingRelayReceiver) remoteRelayReceiver;
+                    routingRelayReceiverImpl.off(theNote);
+                } else {
+                    remoteRelayReceiver.off(outputChannel);
                 }
             }
         }

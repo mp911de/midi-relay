@@ -1,5 +1,7 @@
 package de.paluch.midi.relay.config;
 
+import com.google.common.collect.Lists;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -17,7 +19,7 @@ public class MidiChannelMap {
     @XmlAttribute(name = "device")
     private String device;
 
-    private List<String> note;
+    private List<String> note = Lists.newArrayList();
 
     public int getChannel() {
         return channel;
