@@ -36,11 +36,11 @@ public class LoggingRelayReceiver implements RemoteRelayReceiver, RoutingRelayRe
 
     @Override
     public void on(String note) {
-        log.info("ON " + note);
+        log.debug("ON " + note);
     }
 
     @Override
     public void off(String note) {
-        log.info("OFF " + note);
+        log.debug("OFF " + note);
     }
 }
