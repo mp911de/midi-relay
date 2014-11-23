@@ -1,46 +1,54 @@
+<!DOCTYPE midiMapping [
+        <!ELEMENT midiMapping (channel)*>
+        <!ELEMENT channel (note)*>
+        <!ATTLIST channel
+                device CDATA #REQUIRED
+                id CDATA #REQUIRED>
+        <!ELEMENT note (#PCDATA)>
+        ]>
 <midiMapping>
     <!-- "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" -->
     <channel id="1" device="ethrly16A">
         <note>C</note>
     </channel>
 
-    <channel id="2" device="ethrly16A">
+    <channel id="1" device="ethrly16A">
         <note>C#</note>
     </channel>
 
-    <channel id="3" device="ethrly16A">
+    <channel id="6" device="ethrly16A">
         <note>D</note>
     </channel>
 
-    <channel id="4" device="ethrly16A">
+    <channel id="6" device="ethrly16A">
         <note>D#</note>
     </channel>
 
-    <channel id="5" device="ethrly16A">
+    <channel id="1" device="ethrly16B">
         <note>E</note>
     </channel>
 
-    <channel id="6" device="ethrly16A">
+    <channel id="3" device="ethrly16B">
         <note>F</note>
     </channel>
 
-    <channel id="7" device="ethrly16A">
+    <channel id="5" device="ethrly16A">
         <note>F#</note>
     </channel>
 
-    <channel id="8" device="ethrly16A">
+    <channel id="7" device="ethrly16A">
         <note>G</note>
     </channel>
 
-    <channel id="1" device="ethrly16B">
+    <channel id="3" device="ethrly16A">
         <note>G#</note>
     </channel>
 
-    <channel id="2" device="ethrly16B">
+    <channel id="8" device="ethrly16A">
         <note>A</note>
     </channel>
 
-    <channel id="3" device="ethrly16B">
+    <channel id="2" device="ethrly16A">
         <note>A#</note>
     </channel>
 
@@ -48,7 +56,7 @@
         <note>B</note>
     </channel>
 
-    <channel id="5" device="ethrly16B">
+    <channel id="2" device="ethrly16B">
         <note>B#</note>
     </channel>
 
