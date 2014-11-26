@@ -76,6 +76,8 @@ public class HttpControlInterface {
             track.setFileName(state.getFileName());
             track.setSequenceName(state.getSequenceName());
             track.setId(state.getId());
+            track.setErrorState(state.isErrorState());
+            track.setExceptionMessage(state.getExceptionMessage());
             result.setTrack(track);
 
         }

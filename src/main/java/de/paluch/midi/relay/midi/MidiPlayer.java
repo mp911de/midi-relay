@@ -74,10 +74,15 @@ public class MidiPlayer {
 
         if (run) {
             try {
+                this.state = request;
+                state.setErrorState(false);
+                state.setExceptionMessage(null);
                 prepare(request);
                 playFile(request);
                 receiver.off(0);
             } catch (Exception e) {
+                state.setErrorState(true);
+                state.setExceptionMessage(e.toString());
                 log.warn(request.getFileName() + ": " + e.getMessage(), e);
             } finally {
                 if (state != null) {
@@ -114,8 +119,11 @@ public class MidiPlayer {
             for (File theFile : theFiles) {
                 if (run) {
                     try {
+                        this.state = new PlayerState();
+                        state.setErrorState(false);
+                        state.setExceptionMessage(null);
+
                         byte[] bytes = Files.asByteSource(theFile).read();
-                        PlayerState state = new PlayerState();
                         state.setMidiContents(bytes);
                         state.setFileName(theFile.getName());
 
@@ -123,6 +131,8 @@ public class MidiPlayer {
                         playFile(state);
                         receiver.off(0);
                     } catch (Exception e) {
+                        state.setErrorState(true);
+                        state.setExceptionMessage(e.toString());
                         log.warn(theFile.getName() + ": " + e.getMessage(), e);
                     } finally {
                         if (state != null) {
@@ -193,7 +203,7 @@ public class MidiPlayer {
 
         this.state = state;
         int originalDuration = state.getDuration();
-        state.setDuration(originalDuration + 4);
+        state.setDuration(originalDuration + 3);
         state.setStarted(System.currentTimeMillis());
         state.setRunning(true);
 
@@ -209,7 +219,6 @@ public class MidiPlayer {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
                 break;
             }
         }
