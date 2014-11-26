@@ -1,16 +1,29 @@
 package de.paluch.midi.relay.midi;
 
-import java.io.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.*;
-
-import javax.sound.midi.*;
-
-import org.apache.log4j.Logger;
-
 import com.google.common.io.Files;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import org.apache.log4j.Logger;
+
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MetaMessage;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Track;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -133,10 +146,8 @@ public class MidiPlayer {
     }
 
     private int getDurationSecs(Sequence sequence) throws MidiUnavailableException, InvalidMidiDataException {
-        Sequencer sequencer = MidiSystem.getSequencer();
         sequencer.setSequence(sequence);
         int durationInSecs = (int) (sequencer.getMicrosecondLength() / 1000000.0);
-        sequencer.close();
         return durationInSecs;
     }
 
@@ -189,7 +200,7 @@ public class MidiPlayer {
         log.info("Starting  " + state.getSequenceName() + "/" + state.getFileName());
         receiver.off(0);
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         sequencer.setSequence(MidiSystem.getSequence(new ByteArrayInputStream(state.getMidiContents())));
         long sequenceStarted = System.currentTimeMillis();
         sequencer.start();

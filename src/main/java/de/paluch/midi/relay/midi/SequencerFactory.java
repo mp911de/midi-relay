@@ -66,6 +66,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
         }
 
         seq.open();
+        MidiInstance.getInstance().setSequencer(seq);
 
         return seq;
     }
