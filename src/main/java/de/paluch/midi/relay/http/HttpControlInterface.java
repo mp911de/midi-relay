@@ -70,6 +70,9 @@ public class HttpControlInterface {
             int secondsToPlay = Math.max(0, state.getDuration() - ((int) played / 1000));
 
             result.setEstimatedSecondsToPlay(secondsToPlay);
+        }
+
+        if (state.isRunning() || state.isErrorState()) {
 
             PlayerStateTrackRepresentation track = new PlayerStateTrackRepresentation();
             track.setDuration(state.getDuration());
@@ -79,7 +82,6 @@ public class HttpControlInterface {
             track.setErrorState(state.isErrorState());
             track.setExceptionMessage(state.getExceptionMessage());
             result.setTrack(track);
-
         }
 
         return result;
