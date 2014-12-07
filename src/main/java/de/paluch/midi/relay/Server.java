@@ -4,6 +4,7 @@ import de.paluch.midi.relay.http.HttpControlInterface;
 import de.paluch.midi.relay.http.NotFoundExceptionMapper;
 import de.paluch.midi.relay.http.RsApplication;
 import de.paluch.midi.relay.midi.MidiInstance;
+import de.paluch.midi.relay.midi.WorkQueueExecutor;
 import org.jboss.resteasy.plugins.server.netty.NettyJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.springframework.context.support.AbstractXmlApplicationContext;
@@ -18,8 +19,7 @@ import java.util.Set;
 /**
  * Server Initiator.
  */
-public class Server
-{
+public class Server {
 
     private static Server instance;
 
@@ -28,23 +28,23 @@ public class Server
 
     private boolean active = true;
     private boolean shutdown = false;
+    private WorkQueueExecutor executor;
 
-    private Server(String configFile) throws Exception
-    {
+    private Server(String configFile) throws Exception {
 
         context = new ClassPathXmlApplicationContext("spring-ctx.xml");
         HttpControlInterface http = (HttpControlInterface) context.getBean("http");
 
         rsApplication = new RsApplication();
         rsApplication.setObjects((Set) new HashSet(Arrays.asList(http, new NotFoundExceptionMapper())));
+        executor = context.getBean(WorkQueueExecutor.class);
+        executor.start();
 
     }
 
-    public static void main(String args[]) throws Exception
-    {
+    public static void main(String args[]) throws Exception {
 
-        if (args.length == 0)
-        {
+        if (args.length == 0) {
             System.out.println("Usage: Server CONFIG FILE NAME");
             return;
         }
@@ -52,8 +52,7 @@ public class Server
 
         MidiDevice.Info[] devices = MidiSystem.getMidiDeviceInfo();
         System.out.println("Available Devices");
-        for (MidiDevice.Info device : devices)
-        {
+        for (MidiDevice.Info device : devices) {
             System.out.println("   " + device.getName() + "/" + device.getDescription() + "/" + device.getVendor());
         }
 
@@ -63,34 +62,29 @@ public class Server
         instance.close();
     }
 
-    private void installShutdownHook()
-    {
+    private void installShutdownHook() {
 
-        Runtime.getRuntime().addShutdownHook(new Thread()
-        {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override
-            public void run()
-            {
+            public void run() {
                 instance.active = false;
+                executor.shutdown();
 
                 System.out.println("Stopping server");
-                try
-                {
-                    while (!instance.shutdown)
-                    {
+                try {
+                    executor.join();
+                    while (!instance.shutdown) {
                         Thread.sleep(100);
                     }
-                } catch (InterruptedException e)
-                {
+                } catch (InterruptedException e) {
 
                 }
             }
         });
     }
 
-    private void run() throws Exception
-    {
+    private void run() throws Exception {
         ResteasyDeployment deployment = new ResteasyDeployment();
         deployment.setApplication(rsApplication);
         NettyJaxrsServer netty = new NettyJaxrsServer();
@@ -114,11 +108,10 @@ public class Server
         System.out.println("GET http://" + hostPart + "/player/ to get the current state (running/stopped)");
         System.out.println("GET http://" + hostPart + "/player/port/{port:0-8}/{state:ON|OFF} to control port state");
         System.out.println("GET http://" + hostPart + "/player/devices get a list of all devices (xml format)");
-        System.out.println("GET http://" + hostPart +
-                                   "/player/devices/{id}/to/relay to connect an in-device to the out device (relay)");
+        System.out.println("GET http://" + hostPart
+                + "/player/devices/{id}/to/relay to connect an in-device to the out device (relay)");
 
-        while (active)
-        {
+        while (active) {
             Thread.sleep(500);
         }
 
@@ -127,23 +120,19 @@ public class Server
         System.out.println("Server stopped");
     }
 
-    private void close()
-    {
-        if (MidiInstance.getInstance().getReceiver() != null)
-        {
+    private void close() {
+        if (MidiInstance.getInstance().getReceiver() != null) {
             MidiInstance.getInstance().getReceiver().close();
         }
 
-        if (MidiInstance.getInstance().getSequencer() != null)
-        {
+        if (MidiInstance.getInstance().getSequencer() != null) {
             MidiInstance.getInstance().getSequencer().close();
         }
 
         context.close();
     }
 
-    public static Server getInstance()
-    {
+    public static Server getInstance() {
         return instance;
     }
 

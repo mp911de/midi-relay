@@ -21,17 +21,38 @@ public class MidiRelayReceiver implements Receiver {
     private Logger log = Logger.getLogger(getClass());
     private Map<String, Integer> channelMap = new HashMap<String, Integer>();
     private RemoteRelayReceiver remoteRelayReceiver;
+    private WorkQueueExecutor workQueueExecutor;
 
     public MidiRelayReceiver(RemoteRelayReceiver remoteRelayReceiver) {
         this.remoteRelayReceiver = remoteRelayReceiver;
+    }
+
+    public WorkQueueExecutor getWorkQueueExecutor() {
+        return workQueueExecutor;
+    }
+
+    public void setWorkQueueExecutor(WorkQueueExecutor workQueueExecutor) {
+        this.workQueueExecutor = workQueueExecutor;
+        workQueueExecutor.setCallback(new WorkQueueExecutor.Callback() {
+            @Override
+            public void call(MidiMessage midiMessage) {
+                processMessage(midiMessage);
+            }
+        });
     }
 
     @Override
     public void send(MidiMessage message, long timeStamp) {
 
         try {
-            if (!(message instanceof MetaMessage)) {
+            if (message instanceof MetaMessage) {
+                return;
+            }
+
+            if (workQueueExecutor == null) {
                 processMessage(message);
+            } else {
+                workQueueExecutor.submit(message);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

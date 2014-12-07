@@ -3,6 +3,7 @@ package de.paluch.midi.relay.http;
 import de.paluch.midi.relay.midi.MidiInstance;
 import de.paluch.midi.relay.midi.MidiPlayer;
 import de.paluch.midi.relay.midi.PlayerState;
+import de.paluch.midi.relay.midi.WorkQueueExecutor;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
@@ -41,6 +42,7 @@ public class HttpControlInterface {
     private RemoteRelayReceiver remoteRelayReceiver;
     private Scheduler scheduler;
     private Map<Integer, MidiDevice> deviceMap = new ConcurrentHashMap<Integer, MidiDevice>();
+    private WorkQueueExecutor workQueueExecutor;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -238,6 +240,23 @@ public class HttpControlInterface {
 
     }
 
+    @GET
+    @Path("delay")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getDelay() {
+        return "" + workQueueExecutor.getDelay();
+    }
+
+    @PUT
+    @Path("delay")
+    @Consumes()
+    @Produces(MediaType.TEXT_PLAIN)
+    public String setDelay(String delay) {
+        workQueueExecutor.setDelay(Long.parseLong(delay));
+        return "" + workQueueExecutor.getDelay();
+
+    }
+
     public MidiPlayer getMidiPlayer() {
         return midiPlayer;
     }
@@ -260,5 +279,13 @@ public class HttpControlInterface {
 
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;
+    }
+
+    public WorkQueueExecutor getWorkQueueExecutor() {
+        return workQueueExecutor;
+    }
+
+    public void setWorkQueueExecutor(WorkQueueExecutor workQueueExecutor) {
+        this.workQueueExecutor = workQueueExecutor;
     }
 }

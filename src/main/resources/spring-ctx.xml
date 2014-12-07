@@ -17,6 +17,7 @@
         <property name="midiPlayer" ref="midiPlayer" />
         <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
         <property name="scheduler" ref="quartzScheduler" />
+        <property name="workQueueExecutor" ref="workQueueExecutor" />
     </bean>
 
     <bean id="remoteRelayReceiver" class="de.paluch.midi.relay.relay.RemoteRelayReceiverWrapper">
@@ -43,12 +44,17 @@
     <bean id="sequencer" class="de.paluch.midi.relay.midi.SequencerFactory">
         <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
         <property name="channelMap" ref="channelMap" />
+        <property name="workQueueExecutor" ref="workQueueExecutor" />
     </bean>
 
     <bean id="midiPlayer" class="de.paluch.midi.relay.midi.MidiPlayer">
         <property name="midiDirectory" value="${midiDirectory}" />
         <property name="receiver" ref="remoteRelayReceiver" />
         <property name="sequencer" ref="sequencer" />
+    </bean>
+
+    <bean id="workQueueExecutor" class="de.paluch.midi.relay.midi.WorkQueueExecutor">
+
     </bean>
 
     <bean id="routingRelayReceiver" class="de.paluch.midi.relay.relay.RoutingRelayReceiverImpl">

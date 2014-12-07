@@ -22,6 +22,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
     private Logger log = Logger.getLogger(getClass());
     private RemoteRelayReceiver remoteRelayReceiver;
     private String deviceFilter = null;
+    private WorkQueueExecutor workQueueExecutor;
 
     private List<MidiChannelMap> channelMap;
 
@@ -35,6 +36,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
 
         MidiRelayReceiver midiRelayReceiver = new MidiRelayReceiver(remoteRelayReceiver);
         midiRelayReceiver.setChannelMap(channelMap);
+        midiRelayReceiver.setWorkQueueExecutor(workQueueExecutor);
 
         Sequencer seq = MidiSystem.getSequencer(false);
         Transmitter transmitter = seq.getTransmitter();
@@ -101,5 +103,13 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
 
     public void setDeviceFilter(String deviceFilter) {
         this.deviceFilter = deviceFilter;
+    }
+
+    public WorkQueueExecutor getWorkQueueExecutor() {
+        return workQueueExecutor;
+    }
+
+    public void setWorkQueueExecutor(WorkQueueExecutor workQueueExecutor) {
+        this.workQueueExecutor = workQueueExecutor;
     }
 }
