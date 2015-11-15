@@ -46,7 +46,6 @@ public class WorkQueueExecutor extends Thread
                     LOG.warn(e.getMessage(), e);
                 }
             }
-
         }
 
         LOG.info("Stopped Queue Processing");

@@ -1,18 +1,16 @@
 package de.paluch.midi.relay.midi;
 
-import de.paluch.midi.relay.config.MidiChannelMap;
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import java.util.List;
+
+import javax.sound.midi.*;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.util.StringUtils;
 
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.Transmitter;
-import java.util.List;
+import de.paluch.midi.relay.config.MidiChannelMap;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -22,6 +20,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
     private Logger log = Logger.getLogger(getClass());
     private RemoteRelayReceiver remoteRelayReceiver;
     private String deviceFilter = null;
+    private String systemSynth = null;
     private WorkQueueExecutor workQueueExecutor;
 
     private List<MidiChannelMap> channelMap;
@@ -40,29 +39,32 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
 
         Sequencer seq = MidiSystem.getSequencer(false);
         Transmitter transmitter = seq.getTransmitter();
-        MultiTargetReceiver multiTargetReceiver = MidiInstance.getInstance().getReceiver();
+        MultiTargetReceiver withSound = MidiInstance.getInstance().getWithSound();
+        MultiTargetReceiver withRelay = MidiInstance.getInstance().getWithRelay();
 
-        transmitter.setReceiver(multiTargetReceiver);
+        MultiTargetReceiver sequencerPlayerGroup = new MultiTargetReceiver();
+        withRelay.addReceiver(midiRelayReceiver);
 
-        multiTargetReceiver.addReceiver(midiRelayReceiver);
+        sequencerPlayerGroup.addReceiver(withRelay);
+        sequencerPlayerGroup.addReceiver(withSound);
+        transmitter.setReceiver(sequencerPlayerGroup);
 
-        if (!StringUtils.hasText(deviceFilter)) {
-            Receiver systemReceiver = MidiSystem.getReceiver();
-            multiTargetReceiver.addReceiver(systemReceiver);
+        MidiDevice.Info[] midiDeviceInfo = MidiSystem.getMidiDeviceInfo();
+        if (StringUtils.hasText(systemSynth)) {
 
-        } else {
-            MidiDevice.Info[] midiDeviceInfo = MidiSystem.getMidiDeviceInfo();
+            for (MidiDevice.Info info : midiDeviceInfo) {
+                if (systemSynth.contains(info.getName())) {
+                    addDevice(withSound, withSound, info);
+                }
+            }
+        }else{
+            withSound.addReceiver(MidiSystem.getReceiver());
+        }
+
+        if (StringUtils.hasText(deviceFilter)) {
             for (MidiDevice.Info info : midiDeviceInfo) {
                 if (deviceFilter.contains(info.getName())) {
-                    MidiDevice midiDevice = MidiSystem.getMidiDevice(info);
-                    if (midiDevice instanceof Receiver) {
-                        log.info("Adding receiver" + info.getName());
-
-                        multiTargetReceiver.addReceiver((Receiver) midiDevice);
-
-                    } else {
-                        log.warn("Device " + info.getName() + " is not a receiver.");
-                    }
+                    addDevice(withSound, withRelay, info);
                 }
             }
         }
@@ -71,6 +73,30 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
         MidiInstance.getInstance().setSequencer(seq);
 
         return seq;
+    }
+
+    private void addDevice(MultiTargetReceiver withSound, MultiTargetReceiver withRelay, MidiDevice.Info info)
+            throws MidiUnavailableException {
+        MidiDevice midiDevice = MidiSystem.getMidiDevice(info);
+        if (midiDevice.getMaxReceivers() != 0) {
+            log.info("Adding receiver " + info.getName());
+
+            if (!midiDevice.isOpen()) {
+                midiDevice.open();
+            }
+
+            withSound.addReceiver(midiDevice.getReceiver());
+        }
+
+        if (midiDevice.getMaxTransmitters() != 0) {
+            log.info("Adding transmitter " + info.getName());
+
+            if (!midiDevice.isOpen()) {
+                midiDevice.open();
+            }
+
+            midiDevice.getTransmitter().setReceiver(withRelay);
+        }
     }
 
     @Override
@@ -103,6 +129,14 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
 
     public void setDeviceFilter(String deviceFilter) {
         this.deviceFilter = deviceFilter;
+    }
+
+    public String getSystemSynth() {
+        return systemSynth;
+    }
+
+    public void setSystemSynth(String systemSynth) {
+        this.systemSynth = systemSynth;
     }
 
     public WorkQueueExecutor getWorkQueueExecutor() {

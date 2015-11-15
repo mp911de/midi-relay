@@ -121,8 +121,12 @@ public class Server {
     }
 
     private void close() {
-        if (MidiInstance.getInstance().getReceiver() != null) {
-            MidiInstance.getInstance().getReceiver().close();
+        if (MidiInstance.getInstance().getWithRelay() != null) {
+            MidiInstance.getInstance().getWithRelay().close();
+        }
+
+        if (MidiInstance.getInstance().getWithSound() != null) {
+            MidiInstance.getInstance().getWithSound().close();
         }
 
         if (MidiInstance.getInstance().getSequencer() != null) {

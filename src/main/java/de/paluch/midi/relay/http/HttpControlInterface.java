@@ -1,35 +1,24 @@
 package de.paluch.midi.relay.http;
 
-import de.paluch.midi.relay.midi.MidiInstance;
-import de.paluch.midi.relay.midi.MidiPlayer;
-import de.paluch.midi.relay.midi.PlayerState;
-import de.paluch.midi.relay.midi.WorkQueueExecutor;
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.sound.midi.*;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.impl.matchers.GroupMatcher;
 
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.Synthesizer;
-import javax.sound.midi.Transmitter;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import de.paluch.midi.relay.midi.MidiInstance;
+import de.paluch.midi.relay.midi.MidiPlayer;
+import de.paluch.midi.relay.midi.PlayerState;
+import de.paluch.midi.relay.midi.WorkQueueExecutor;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -133,7 +122,8 @@ public class HttpControlInterface {
     @Path("device")
     @Produces(MediaType.TEXT_PLAIN)
     public String setActive(@QueryParam("id") int id, @QueryParam("state") boolean state) throws Exception {
-        MidiInstance.getInstance().getReceiver().setActive(id, state);
+        MidiInstance.getInstance().getWithRelay().setActive(id, state);
+        MidiInstance.getInstance().getWithSound().setActive(id, state);
         return "OK";
     }
 
@@ -231,12 +221,12 @@ public class HttpControlInterface {
             deviceMap.put(id, device);
         }
 
-        device.getTransmitter().setReceiver(MidiInstance.getInstance().getReceiver());
+        device.getTransmitter().setReceiver(MidiInstance.getInstance().getWithRelay());
 
         if (!device.isOpen()) {
             device.open();
         }
-        return "ADDED";
+        return "ADDED " + device.getDeviceInfo().getName() + "/" + device.getDeviceInfo().getDescription();
 
     }
 

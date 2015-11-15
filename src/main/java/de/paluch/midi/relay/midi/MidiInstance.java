@@ -9,7 +9,8 @@ import javax.sound.midi.Sequencer;
 public class MidiInstance {
 
     private Sequencer sequencer;
-    private MultiTargetReceiver receiver = new MultiTargetReceiver();
+    private MultiTargetReceiver withSound = new MultiTargetReceiver();
+    private MultiTargetReceiver withRelay = new MultiTargetReceiver();
 
     private static MidiInstance instance = new MidiInstance();
 
@@ -25,7 +26,11 @@ public class MidiInstance {
         this.sequencer = sequencer;
     }
 
-    public MultiTargetReceiver getReceiver() {
-        return receiver;
+    public MultiTargetReceiver getWithSound() {
+        return withSound;
+    }
+
+    public MultiTargetReceiver getWithRelay() {
+        return withRelay;
     }
 }

@@ -42,6 +42,8 @@
     </bean>
 
     <bean id="sequencer" class="de.paluch.midi.relay.midi.SequencerFactory">
+        <property name="deviceFilter" value="${device.filter:}" />
+        <property name="systemSynth" value="${device.system-synth:}" />
         <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
         <property name="channelMap" ref="channelMap" />
         <property name="workQueueExecutor" ref="workQueueExecutor" />
