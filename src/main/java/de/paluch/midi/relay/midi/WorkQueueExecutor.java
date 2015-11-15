@@ -1,10 +1,11 @@
 package de.paluch.midi.relay.midi;
 
-import org.apache.log4j.Logger;
-
-import javax.sound.midi.MidiMessage;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.sound.midi.MidiMessage;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>

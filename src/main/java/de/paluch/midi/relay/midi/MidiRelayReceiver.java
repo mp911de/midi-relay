@@ -1,16 +1,18 @@
 package de.paluch.midi.relay.midi;
 
-import de.paluch.midi.relay.config.MidiChannelMap;
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
-import de.paluch.midi.relay.relay.RoutingRelayReceiver;
-import org.apache.log4j.Logger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+import de.paluch.midi.relay.config.MidiChannelMap;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import de.paluch.midi.relay.relay.RoutingRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>

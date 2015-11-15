@@ -1,7 +1,8 @@
 package de.paluch.midi.relay.job;
 
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import org.quartz.*;
+
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -9,7 +10,6 @@ import org.quartz.*;
  */
 @DisallowConcurrentExecution
 public class SwitchOnJob implements Job {
-
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {

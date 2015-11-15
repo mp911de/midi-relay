@@ -1,11 +1,12 @@
 package de.paluch.midi.relay.job;
 
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -14,7 +15,6 @@ import org.quartz.JobExecutionException;
 public class ConnectionWatchdogJob implements Job {
 
     private Logger log = Logger.getLogger(getClass());
-
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {

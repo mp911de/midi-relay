@@ -1,11 +1,12 @@
 package de.paluch.midi.relay.config;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import java.util.List;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>

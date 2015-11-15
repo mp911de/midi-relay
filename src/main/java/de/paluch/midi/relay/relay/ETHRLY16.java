@@ -1,7 +1,5 @@
 package de.paluch.midi.relay.relay;
 
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -9,12 +7,13 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import org.apache.log4j.Logger;
+
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 08.11.12 19:59
  */
-public class ETHRLY16 implements RemoteRelayReceiver
-{
+public class ETHRLY16 implements RemoteRelayReceiver {
 
     private Logger log = Logger.getLogger(getClass());
     private String hostname;
@@ -27,73 +26,54 @@ public class ETHRLY16 implements RemoteRelayReceiver
     public final static int ALL_ON = 100;
     public final static int ALL_OFF = 110;
 
-    public ETHRLY16()
-    {
+    public ETHRLY16() {
 
     }
 
-    private void checkOrInit()
-    {
-        try
-        {
-            if (socketChannel == null)
-            {
+    private void checkOrInit() {
+        try {
+            if (socketChannel == null) {
                 socketChannel = SocketChannel.open();
                 socketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
 
             }
-            if (!socketChannel.isConnected())
-            {
+            if (!socketChannel.isConnected()) {
                 boolean connected = socketChannel.connect(new InetSocketAddress(hostname, port));
-                if (!connected)
-                {
+                if (!connected) {
                     long startTime = System.currentTimeMillis();
-                    while (!socketChannel.finishConnect())
-                    {
-                        if (System.currentTimeMillis() - startTime < 1000)
-                        {
+                    while (!socketChannel.finishConnect()) {
+                        if (System.currentTimeMillis() - startTime < 1000) {
                             // keep trying
                             Thread.sleep(100);
-                        } else
-                        {
+                        } else {
                             throw new SocketException("Connection timeout");
                         }
                     }
                 }
             }
 
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             log.warn(e.getMessage(), e);
-            try
-            {
-                if (socketChannel != null)
-                {
+            try {
+                if (socketChannel != null) {
                     socketChannel.close();
                 }
-            } catch (IOException e1)
-            {
+            } catch (IOException e1) {
             }
 
-        } catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
 
-        if (socketChannel != null)
-        {
-            if (socketChannel.isConnected())
-            {
-                try
-                {
+        if (socketChannel != null) {
+            if (socketChannel.isConnected()) {
+                try {
                     socketChannel.close();
-                } catch (IOException e)
-                {
+                } catch (IOException e) {
                     log.warn(e.getMessage(), e);
                 }
             }
@@ -102,13 +82,10 @@ public class ETHRLY16 implements RemoteRelayReceiver
     }
 
     @Override
-    public void keepaliveOrClose()
-    {
-        if (socketChannel != null)
-        {
+    public void keepaliveOrClose() {
+        if (socketChannel != null) {
             long unused = System.currentTimeMillis() - lastSendTimestamp;
-            if (unused > connectionKeepAlive)
-            {
+            if (unused > connectionKeepAlive) {
                 log.info("Closing socket because of inactivity since " + unused + "ms");
                 close();
             }
@@ -116,20 +93,16 @@ public class ETHRLY16 implements RemoteRelayReceiver
     }
 
     @Override
-    public void on(int port)
-    {
+    public void on(int port) {
 
         write(ALL_ON + port);
 
     }
 
-    private void write(int command)
-    {
+    private void write(int command) {
         checkOrInit();
-        try
-        {
-            if (socketChannel != null && socketChannel.isConnected())
-            {
+        try {
+            if (socketChannel != null && socketChannel.isConnected()) {
                 bytesSent++;
 
                 ByteBuffer buf = ByteBuffer.allocate(1);
@@ -138,48 +111,40 @@ public class ETHRLY16 implements RemoteRelayReceiver
 
                 buf.flip();
 
-                while (buf.hasRemaining())
-                {
+                while (buf.hasRemaining()) {
                     socketChannel.write(buf);
                 }
 
                 lastSendTimestamp = System.currentTimeMillis();
             }
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             log.warn(e.toString());
         }
     }
 
     @Override
-    public void off(int port)
-    {
+    public void off(int port) {
         write(ALL_OFF + port);
     }
 
     @Override
-    public long getBytesSent()
-    {
+    public long getBytesSent() {
         return bytesSent;
     }
 
-    public String getHostname()
-    {
+    public String getHostname() {
         return hostname;
     }
 
-    public void setHostname(String hostname)
-    {
+    public void setHostname(String hostname) {
         this.hostname = hostname;
     }
 
-    public int getPort()
-    {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(int port)
-    {
+    public void setPort(int port) {
         this.port = port;
     }
 }

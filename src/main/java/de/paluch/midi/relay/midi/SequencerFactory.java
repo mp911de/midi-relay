@@ -57,7 +57,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
                     addDevice(withSound, withSound, info);
                 }
             }
-        }else{
+        } else {
             withSound.addReceiver(MidiSystem.getReceiver());
         }
 

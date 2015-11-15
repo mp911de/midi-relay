@@ -16,7 +16,7 @@ public class PlayerStateRepresentation {
     private Date startedTime;
     private Date started;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date estimatedEndTime;
     private Date estimatedEnd;
 
@@ -37,18 +37,18 @@ public class PlayerStateRepresentation {
     }
 
     public void setStarted(Date started) {
-		this.startedTime = started;
-		this.started = started;
-	}
+        this.startedTime = started;
+        this.started = started;
+    }
 
     public Date getEstimatedEnd() {
         return estimatedEnd;
     }
 
     public void setEstimatedEnd(Date estimatedEnd) {
-		this.estimatedEndTime = estimatedEnd;
-		this.estimatedEnd = estimatedEnd;
-	}
+        this.estimatedEndTime = estimatedEnd;
+        this.estimatedEnd = estimatedEnd;
+    }
 
     public int getEstimatedSecondsToPlay() {
         return estimatedSecondsToPlay;

@@ -1,29 +1,16 @@
 package de.paluch.midi.relay.midi;
 
-import com.google.common.io.Files;
-import de.paluch.midi.relay.relay.RemoteRelayReceiver;
-import org.apache.log4j.Logger;
-
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MetaMessage;
-import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.Track;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+
+import javax.sound.midi.*;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.io.Files;
+import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>

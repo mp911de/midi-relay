@@ -1,16 +1,17 @@
 package de.paluch.midi.relay.relay;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import de.paluch.midi.relay.config.MidiChannelMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import de.paluch.midi.relay.config.MidiChannelMap;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>

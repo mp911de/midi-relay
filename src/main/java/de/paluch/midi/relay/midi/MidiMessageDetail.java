@@ -6,8 +6,7 @@ import javax.sound.midi.MidiMessage;
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  * @since 30.11.13 17:50
  */
-public class MidiMessageDetail
-{
+public class MidiMessageDetail {
     byte[] bytes;
     byte message[] = null;
     int t1 = 0;
@@ -18,22 +17,18 @@ public class MidiMessageDetail
 
     private MidiMessage midiMessage;
 
-    public MidiMessageDetail(MidiMessage midiMessage)
-    {
+    public MidiMessageDetail(MidiMessage midiMessage) {
 
         bytes = midiMessage.getMessage();
-        if (bytes.length > 1)
-        {
+        if (bytes.length > 1) {
             t1 = bytes[0];
             t2 = bytes[1];
 
-            if (bytes.length > 2)
-            {
+            if (bytes.length > 2) {
                 t3 = bytes[2];
 
                 message = new byte[bytes.length - 3];
-                if (bytes.length >= 3)
-                {
+                if (bytes.length >= 3) {
                     System.arraycopy(bytes, 3, message, 0, message.length);
                 }
             }
@@ -43,36 +38,35 @@ public class MidiMessageDetail
         lo = (byte) (t1 & 0x0F);
     }
 
-    public byte[] getBytes()
-    {
+    public byte[] getBytes() {
         return bytes;
     }
-    public byte[] getMessage()
-    {
+
+    public byte[] getMessage() {
         return message;
     }
-    public int getT1()
-    {
+
+    public int getT1() {
         return t1;
     }
-    public int getT2()
-    {
+
+    public int getT2() {
         return t2;
     }
-    public int getT3()
-    {
+
+    public int getT3() {
         return t3;
     }
-    public byte getHi()
-    {
+
+    public byte getHi() {
         return hi;
     }
-    public byte getLo()
-    {
+
+    public byte getLo() {
         return lo;
     }
-    public MidiMessage getMidiMessage()
-    {
+
+    public MidiMessage getMidiMessage() {
         return midiMessage;
     }
 }

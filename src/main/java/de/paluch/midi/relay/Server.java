@@ -1,20 +1,22 @@
 package de.paluch.midi.relay;
 
-import de.paluch.midi.relay.http.HttpControlInterface;
-import de.paluch.midi.relay.http.NotFoundExceptionMapper;
-import de.paluch.midi.relay.http.RsApplication;
-import de.paluch.midi.relay.midi.MidiInstance;
-import de.paluch.midi.relay.midi.WorkQueueExecutor;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+
 import org.jboss.resteasy.plugins.server.netty.NettyJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiSystem;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import de.paluch.midi.relay.http.HttpControlInterface;
+import de.paluch.midi.relay.http.NotFoundExceptionMapper;
+import de.paluch.midi.relay.http.RsApplication;
+import de.paluch.midi.relay.midi.MidiInstance;
+import de.paluch.midi.relay.midi.WorkQueueExecutor;
 
 /**
  * Server Initiator.

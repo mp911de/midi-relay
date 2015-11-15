@@ -1,18 +1,17 @@
 package de.paluch.midi.relay.config;
 
-import org.springframework.beans.factory.config.AbstractFactoryBean;
-
-import javax.xml.bind.JAXB;
-import java.io.File;
 import java.net.URL;
 import java.util.List;
+
+import javax.xml.bind.JAXB;
+
+import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 02.12.12 13:49
  */
-public class ChannelMapFactory extends AbstractFactoryBean<List<MidiChannelMap>>
-{
+public class ChannelMapFactory extends AbstractFactoryBean<List<MidiChannelMap>> {
     private URL configUrl;
 
     @Override
