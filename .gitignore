@@ -2,5 +2,6 @@ out
 target
 atlassian-ide-plugin.xml
 *.iml
-
 *.log
+.idea
+
