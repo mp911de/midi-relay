@@ -7,24 +7,8 @@
            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 
-    <context:property-placeholder location="file:config.properties" />
-
-    <bean id="serverPort" class="java.lang.Integer">
-        <constructor-arg value="${serverPort:9595}" />
-    </bean>
-
-    <bean id="http" class="de.paluch.midi.relay.http.HttpControlInterface">
-        <property name="midiPlayer" ref="midiPlayer" />
-        <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
-        <property name="scheduler" ref="quartzScheduler" />
-        <property name="workQueueExecutor" ref="workQueueExecutor" />
-    </bean>
-
     <bean id="remoteRelayReceiver" class="de.paluch.midi.relay.relay.RemoteRelayReceiverWrapper">
         <property name="delegate" ref="${device}" />
-    </bean>
-
-    <bean id="log" class="de.paluch.midi.relay.relay.LoggingRelayReceiver">
     </bean>
 
     <bean id="ethrly16A" class="de.paluch.midi.relay.relay.ETHRLY16">
@@ -35,32 +19,6 @@
     <bean id="ethrly16B" class="de.paluch.midi.relay.relay.ETHRLY16">
         <property name="hostname" value="${ethrlyHostnameB}" />
         <property name="port" value="${ethrlyPort}" />
-    </bean>
-
-    <bean id="channelMap" class="de.paluch.midi.relay.config.ChannelMapFactory">
-        <property name="configUrl" value="${midiMapping}" />
-    </bean>
-
-    <bean id="sequencer" class="de.paluch.midi.relay.midi.SequencerFactory">
-        <property name="deviceFilter" value="${device.filter:}" />
-        <property name="systemSynth" value="${device.system-synth:}" />
-        <property name="remoteRelayReceiver" ref="remoteRelayReceiver" />
-        <property name="channelMap" ref="channelMap" />
-        <property name="workQueueExecutor" ref="workQueueExecutor" />
-    </bean>
-
-    <bean id="midiPlayer" class="de.paluch.midi.relay.midi.MidiPlayer">
-        <property name="midiDirectory" value="${midiDirectory}" />
-        <property name="receiver" ref="remoteRelayReceiver" />
-        <property name="sequencer" ref="sequencer" />
-    </bean>
-
-    <bean id="workQueueExecutor" class="de.paluch.midi.relay.midi.WorkQueueExecutor">
-
-    </bean>
-
-    <bean id="routingRelayReceiver" class="de.paluch.midi.relay.relay.RoutingRelayReceiverImpl">
-        <property name="channelMap" ref="channelMap" />
     </bean>
 
     <bean name="switchOnJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">

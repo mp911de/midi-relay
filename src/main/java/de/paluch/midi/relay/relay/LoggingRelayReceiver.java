@@ -1,13 +1,13 @@
 package de.paluch.midi.relay.relay;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  * @since 30.11.13 19:24
  */
+@Slf4j
 public class LoggingRelayReceiver implements RemoteRelayReceiver, RoutingRelayReceiver {
-    private Logger log = Logger.getLogger(getClass());
 
     @Override
     public void close() {

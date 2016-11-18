@@ -1,28 +1,32 @@
 package de.paluch.midi.relay.relay;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import de.paluch.midi.relay.config.MidiChannelMap;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class RoutingRelayReceiverImpl implements RoutingRelayReceiver, RemoteRelayReceiver, ApplicationContextAware,
-        InitializingBean {
+@RequiredArgsConstructor
+@Slf4j
+public class RoutingRelayReceiverImpl
+        implements RoutingRelayReceiver, RemoteRelayReceiver, ApplicationContextAware, InitializingBean {
 
-    private Logger log = Logger.getLogger(getClass());
-    private List<MidiChannelMap> channelMap = Lists.newArrayList();
-    private Map<String, RemoteRelayReceiver> devices = Maps.newHashMap();
-    private ApplicationContext applicationContext;
+    final Map<String, RemoteRelayReceiver> devices = new HashMap<>();
+    ApplicationContext applicationContext;
+
+    @NonNull
+    List<MidiChannelMap> channelMap;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -31,6 +35,7 @@ public class RoutingRelayReceiverImpl implements RoutingRelayReceiver, RemoteRel
 
     @Override
     public void afterPropertiesSet() throws Exception {
+
         if (devices.isEmpty()) {
 
             String[] names = applicationContext.getBeanNamesForType(RemoteRelayReceiver.class);
@@ -43,7 +48,6 @@ public class RoutingRelayReceiverImpl implements RoutingRelayReceiver, RemoteRel
                 devices.put(name, relayReceiver);
             }
         }
-
     }
 
     @Override
@@ -110,21 +114,5 @@ public class RoutingRelayReceiverImpl implements RoutingRelayReceiver, RemoteRel
                 }
             }
         }
-    }
-
-    public List<MidiChannelMap> getChannelMap() {
-        return channelMap;
-    }
-
-    public void setChannelMap(List<MidiChannelMap> channelMap) {
-        this.channelMap = channelMap;
-    }
-
-    public Map<String, RemoteRelayReceiver> getDevices() {
-        return devices;
-    }
-
-    public void setDevices(Map<String, RemoteRelayReceiver> devices) {
-        this.devices = devices;
     }
 }

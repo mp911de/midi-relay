@@ -4,45 +4,35 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.Data;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  * @since 30.11.13 19:27
  */
+@Data
+@XmlRootElement
 public class PlayerStateRepresentation {
 
-    private boolean running;
+    boolean running;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date startedTime;
-    private Date started;
+    Date startedTime;
+    Date started;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date estimatedEndTime;
-    private Date estimatedEnd;
+    Date estimatedEndTime;
+    Date estimatedEnd;
 
-    private int estimatedSecondsToPlay;
+    int estimatedSecondsToPlay;
 
-    private PlayerStateTrackRepresentation track;
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
-    public Date getStarted() {
-        return started;
-    }
+    PlayerStateTrackRepresentation track;
 
     public void setStarted(Date started) {
         this.startedTime = started;
         this.started = started;
-    }
-
-    public Date getEstimatedEnd() {
-        return estimatedEnd;
     }
 
     public void setEstimatedEnd(Date estimatedEnd) {
@@ -50,19 +40,4 @@ public class PlayerStateRepresentation {
         this.estimatedEnd = estimatedEnd;
     }
 
-    public int getEstimatedSecondsToPlay() {
-        return estimatedSecondsToPlay;
-    }
-
-    public void setEstimatedSecondsToPlay(int estimatedSecondsToPlay) {
-        this.estimatedSecondsToPlay = estimatedSecondsToPlay;
-    }
-
-    public PlayerStateTrackRepresentation getTrack() {
-        return track;
-    }
-
-    public void setTrack(PlayerStateTrackRepresentation track) {
-        this.track = track;
-    }
 }

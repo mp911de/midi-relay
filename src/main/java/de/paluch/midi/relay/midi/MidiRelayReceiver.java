@@ -8,39 +8,29 @@ import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 
-import org.apache.log4j.Logger;
-
 import de.paluch.midi.relay.config.MidiChannelMap;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import de.paluch.midi.relay.relay.RoutingRelayReceiver;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 08.11.12 19:59
  */
+@Slf4j
 public class MidiRelayReceiver implements Receiver {
 
-    private Logger log = Logger.getLogger(getClass());
-    private Map<String, Integer> channelMap = new HashMap<String, Integer>();
-    private RemoteRelayReceiver remoteRelayReceiver;
-    private WorkQueueExecutor workQueueExecutor;
+    final Map<String, Integer> channelMap = new HashMap<String, Integer>();
+    final RemoteRelayReceiver remoteRelayReceiver;
+    WorkQueueExecutor workQueueExecutor;
 
     public MidiRelayReceiver(RemoteRelayReceiver remoteRelayReceiver) {
         this.remoteRelayReceiver = remoteRelayReceiver;
     }
 
-    public WorkQueueExecutor getWorkQueueExecutor() {
-        return workQueueExecutor;
-    }
-
     public void setWorkQueueExecutor(WorkQueueExecutor workQueueExecutor) {
         this.workQueueExecutor = workQueueExecutor;
-        workQueueExecutor.setCallback(new WorkQueueExecutor.Callback() {
-            @Override
-            public void call(MidiMessage midiMessage) {
-                processMessage(midiMessage);
-            }
-        });
+        workQueueExecutor.setCallback(this::processMessage);
     }
 
     @Override
@@ -113,6 +103,7 @@ public class MidiRelayReceiver implements Receiver {
     }
 
     public void setChannelMap(List<MidiChannelMap> channels) {
+
         for (MidiChannelMap midiChannelMap : channels) {
             if (midiChannelMap.getNote() == null) {
                 continue;

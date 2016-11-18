@@ -7,28 +7,26 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.apache.log4j.Logger;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 08.11.12 19:59
  */
+@Slf4j
+@NoArgsConstructor
 public class ETHRLY16 implements RemoteRelayReceiver {
 
-    private Logger log = Logger.getLogger(getClass());
-    private String hostname;
-    private int port;
-    private long lastSendTimestamp = -1;
-    private long connectionKeepAlive = 30000;
-    private long bytesSent = 0;
-    private SocketChannel socketChannel;
+    String hostname;
+    int port;
+    long lastSendTimestamp = -1;
+    long connectionKeepAlive = 30000;
+    long bytesSent = 0;
+    SocketChannel socketChannel;
 
     public final static int ALL_ON = 100;
     public final static int ALL_OFF = 110;
-
-    public ETHRLY16() {
-
-    }
 
     private void checkOrInit() {
         try {

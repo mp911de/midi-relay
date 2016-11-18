@@ -5,6 +5,7 @@ package de.paluch.midi.relay.relay;
  * @since 30.11.13 19:25
  */
 public class RemoteRelayReceiverWrapper implements RemoteRelayReceiver, RoutingRelayReceiver {
+
     private RemoteRelayReceiver delegate;
 
     public RemoteRelayReceiver getDelegate() {

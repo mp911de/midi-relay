@@ -6,10 +6,10 @@ package de.paluch.midi.relay.midi;
  */
 public class MidiHelper {
 
-    public static int NOTE_ON = 9;
-    public static int NOTE_OFF = 8;
-    public static int PGM_CHANGE = 192;
-    public static char OFFSET_CHAR = 'N';
+    public final static int NOTE_ON = 9;
+    public final static int NOTE_OFF = 8;
+    public final static int PGM_CHANGE = 192;
+    public final static char OFFSET_CHAR = 'N';
 
     private static String NOTENAMES[];
 

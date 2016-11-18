@@ -2,7 +2,7 @@ Midi relay controller
 =====================
 
 This tiny project allows you, to control a [ETHRLY16](http://www.robot-electronics.co.uk/htm/eth_rly16tech.htm) relay via Midi commands. 
-Just start the class `de.paluch.midi.relay.Server` and adjust the config `config.properties`
+Just start the class `de.paluch.midi.relay.Application` with the local profile and adopt `application-local.properties`
 
 Then you can call following URL's to control the whole machine:
 
@@ -15,7 +15,7 @@ Then you can call following URL's to control the whole machine:
 * GET http://localhost:9595/player/devices get a list of all devices
 * GET http://localhost:9595/player/devices/{id}/to/device to connect an in-device to the out device (relay)
 
-This code is experimental.
+This code is experimental and uses Spring Boot.
 
 Resources
 ---------

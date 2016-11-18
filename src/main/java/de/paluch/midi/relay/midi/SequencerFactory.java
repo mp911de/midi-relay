@@ -2,27 +2,33 @@ package de.paluch.midi.relay.midi;
 
 import java.util.List;
 
-import javax.sound.midi.*;
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Transmitter;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.util.StringUtils;
 
 import de.paluch.midi.relay.config.MidiChannelMap;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 02.12.12 13:44
  */
+@Setter
+@Slf4j
 public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements DisposableBean {
-    private Logger log = Logger.getLogger(getClass());
+
     private RemoteRelayReceiver remoteRelayReceiver;
     private String deviceFilter = null;
     private String systemSynth = null;
     private WorkQueueExecutor workQueueExecutor;
-
     private List<MidiChannelMap> channelMap;
 
     @Override
@@ -51,6 +57,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
 
         MidiDevice.Info[] midiDeviceInfo = MidiSystem.getMidiDeviceInfo();
         if (StringUtils.hasText(systemSynth)) {
+            log.info("Trying to resolve " + systemSynth + " to a system synthesizer");
 
             for (MidiDevice.Info info : midiDeviceInfo) {
                 if (systemSynth.contains(info.getName())) {
@@ -62,6 +69,9 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
         }
 
         if (StringUtils.hasText(deviceFilter)) {
+
+            log.info("Trying to resolve " + deviceFilter + " to a device output");
+
             for (MidiDevice.Info info : midiDeviceInfo) {
                 if (deviceFilter.contains(info.getName())) {
                     addDevice(withSound, withRelay, info);
@@ -78,6 +88,7 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
     private void addDevice(MultiTargetReceiver withSound, MultiTargetReceiver withRelay, MidiDevice.Info info)
             throws MidiUnavailableException {
         MidiDevice midiDevice = MidiSystem.getMidiDevice(info);
+
         if (midiDevice.getMaxReceivers() != 0) {
             log.info("Adding receiver " + info.getName());
 
@@ -105,45 +116,5 @@ public class SequencerFactory extends AbstractFactoryBean<Sequencer> implements 
         if (instance.isOpen()) {
             instance.close();
         }
-    }
-
-    public RemoteRelayReceiver getRemoteRelayReceiver() {
-        return remoteRelayReceiver;
-    }
-
-    public void setRemoteRelayReceiver(RemoteRelayReceiver remoteRelayReceiver) {
-        this.remoteRelayReceiver = remoteRelayReceiver;
-    }
-
-    public List<MidiChannelMap> getChannelMap() {
-        return channelMap;
-    }
-
-    public void setChannelMap(List<MidiChannelMap> channelMap) {
-        this.channelMap = channelMap;
-    }
-
-    public String getDeviceFilter() {
-        return deviceFilter;
-    }
-
-    public void setDeviceFilter(String deviceFilter) {
-        this.deviceFilter = deviceFilter;
-    }
-
-    public String getSystemSynth() {
-        return systemSynth;
-    }
-
-    public void setSystemSynth(String systemSynth) {
-        this.systemSynth = systemSynth;
-    }
-
-    public WorkQueueExecutor getWorkQueueExecutor() {
-        return workQueueExecutor;
-    }
-
-    public void setWorkQueueExecutor(WorkQueueExecutor workQueueExecutor) {
-        this.workQueueExecutor = workQueueExecutor;
     }
 }

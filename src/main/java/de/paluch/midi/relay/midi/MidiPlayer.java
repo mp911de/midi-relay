@@ -1,53 +1,51 @@
 package de.paluch.midi.relay.midi;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
-import javax.sound.midi.*;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MetaMessage;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Track;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.io.FileUtils;
 
-import com.google.common.io.Files;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 09.11.12 19:50
  */
+@RequiredArgsConstructor
+@Slf4j
 public class MidiPlayer {
 
-    private Logger log = Logger.getLogger(getClass());
-    private String midiDirectory;
-    private Sequencer sequencer;
-    private RemoteRelayReceiver receiver;
-    private boolean run = false;
-    private PlayerState state;
+    @NonNull
+    String midiDirectory;
+    @NonNull
+    Sequencer sequencer;
+    @NonNull
+    RemoteRelayReceiver receiver;
 
-    public String getMidiDirectory() {
-        return midiDirectory;
-    }
-
-    public void setMidiDirectory(String midiDirectory) {
-        this.midiDirectory = midiDirectory;
-    }
-
-    public Sequencer getSequencer() {
-        return sequencer;
-    }
-
-    public void setSequencer(Sequencer sequencer) {
-        this.sequencer = sequencer;
-    }
-
-    public RemoteRelayReceiver getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(RemoteRelayReceiver receiver) {
-        this.receiver = receiver;
-    }
+    boolean run = false;
+    PlayerState state = null;
 
     public void play(PlayerState request) {
 
@@ -110,7 +108,7 @@ public class MidiPlayer {
                         state.setErrorState(false);
                         state.setExceptionMessage(null);
 
-                        byte[] bytes = Files.asByteSource(theFile).read();
+                        byte[] bytes = FileUtils.readFileToByteArray(theFile);
                         state.setMidiContents(bytes);
                         state.setFileName(theFile.getName());
 

@@ -1,6 +1,5 @@
 package de.paluch.midi.relay.job;
 
-import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -13,8 +12,6 @@ import de.paluch.midi.relay.relay.RemoteRelayReceiver;
  * @since 09.11.12 19:20
  */
 public class ConnectionWatchdogJob implements Job {
-
-    private Logger log = Logger.getLogger(getClass());
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {

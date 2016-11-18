@@ -5,16 +5,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.sound.midi.MidiMessage;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class WorkQueueExecutor extends Thread
+@Slf4j
+public class WorkQueueExecutor extends Thread {
 
-{
-    private static Logger LOG = Logger.getLogger(WorkQueueExecutor.class);
-    private boolean running = true;
+    private volatile boolean running = true;
     private Queue<DelayedMidiMessage> queue = new ConcurrentLinkedQueue<DelayedMidiMessage>();
     private long delay = 0;
     private Callback callback;
@@ -32,7 +31,9 @@ public class WorkQueueExecutor extends Thread
 
     @Override
     public void run() {
-        LOG.info("Starting Queue Processing");
+
+        log.info("Starting Queue Processing");
+
         while (running) {
             try {
                 sleep(10);
@@ -44,12 +45,12 @@ public class WorkQueueExecutor extends Thread
                 try {
                     callback.call(queue.poll().midiMessage);
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage(), e);
+                    log.warn(e.getMessage(), e);
                 }
             }
         }
 
-        LOG.info("Stopped Queue Processing");
+        log.info("Stopped Queue Processing");
     }
 
     private boolean processingNeeded() {
@@ -66,7 +67,7 @@ public class WorkQueueExecutor extends Thread
 
     public void shutdown() {
 
-        LOG.info("Requesting shutdown");
+        log.info("Requesting shutdown");
         running = false;
     }
 

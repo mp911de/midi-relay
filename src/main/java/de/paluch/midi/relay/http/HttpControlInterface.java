@@ -5,36 +5,58 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.sound.midi.*;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.Transmitter;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.paluch.midi.relay.midi.MidiInstance;
 import de.paluch.midi.relay.midi.MidiPlayer;
 import de.paluch.midi.relay.midi.PlayerState;
 import de.paluch.midi.relay.midi.WorkQueueExecutor;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
  * @since 09.11.12 19:58
  */
-@Path("player")
+@RequestMapping(value = "player")
+@Controller
+@ResponseBody
+@RequiredArgsConstructor
 public class HttpControlInterface {
 
-    private MidiPlayer midiPlayer;
-    private RemoteRelayReceiver remoteRelayReceiver;
-    private Scheduler scheduler;
-    private Map<Integer, MidiDevice> deviceMap = new ConcurrentHashMap<Integer, MidiDevice>();
-    private WorkQueueExecutor workQueueExecutor;
+    private final Map<Integer, MidiDevice> deviceMap = new ConcurrentHashMap<Integer, MidiDevice>();
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @NonNull
+    MidiPlayer midiPlayer;
+    @NonNull
+    RemoteRelayReceiver remoteRelayReceiver;
+    @NonNull
+    Scheduler scheduler;
+    @NonNull
+    WorkQueueExecutor workQueueExecutor;
+
+    @GetMapping
     public PlayerStateRepresentation isRunning() throws Exception {
 
         PlayerState state = midiPlayer.getState();
@@ -78,20 +100,15 @@ public class HttpControlInterface {
         return result;
     }
 
-    @GET
-    @Path("play")
-    @Produces(MediaType.TEXT_PLAIN)
+    @GetMapping(value = "play", produces = MediaType.TEXT_PLAIN_VALUE)
     public String play() throws Exception {
         scheduler.triggerJob(new JobKey("playJob"));
         return "OK";
     }
 
-    @PUT
-    @Path("play")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes
-    public String play(@HeaderParam("X-Request-Id") String id, @HeaderParam("X-Request-FileName") String fileName, byte[] body)
-            throws Exception {
+    @PutMapping(value = "play", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String play(@RequestHeader("X-Request-Id") String id, @RequestHeader("X-Request-FileName") String fileName,
+            byte[] body) throws Exception {
         JobDataMap jobData = new JobDataMap();
         PlayerState request = new PlayerState();
         request.setId(id);
@@ -102,35 +119,27 @@ public class HttpControlInterface {
         return "OK";
     }
 
-    @GET
-    @Path("play/{filename}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String play(@PathParam("filename") String filename) throws Exception {
+    @GetMapping(value = "play/{filename}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String play(@PathVariable("filename") String filename) throws Exception {
         midiPlayer.play(filename);
         return "OK";
     }
 
-    @GET
-    @Path("stop")
-    @Produces(MediaType.TEXT_PLAIN)
+    @GetMapping(value = "stop", produces = MediaType.TEXT_PLAIN_VALUE)
     public String stop() throws Exception {
         midiPlayer.stop();
         return "OK";
     }
 
-    @GET
-    @Path("device")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String setActive(@QueryParam("id") int id, @QueryParam("state") boolean state) throws Exception {
+    @GetMapping(value = "device", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String setActive(@RequestParam("id") int id, @RequestParam("state") boolean state) throws Exception {
         MidiInstance.getInstance().getWithRelay().setActive(id, state);
         MidiInstance.getInstance().getWithSound().setActive(id, state);
         return "OK";
     }
 
-    @GET
-    @Path("port/{port:[0-8]}/{state:(ON|OFF)}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String setActive(@PathParam("port") int port, @PathParam("state") String state) throws Exception {
+    @GetMapping(value = "port/{port:[0-8]}/{state:(ON|OFF)}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String setActive(@PathVariable("port") int port, @PathVariable("state") String state) throws Exception {
         if (state.equals("ON")) {
             remoteRelayReceiver.on(port);
         }
@@ -142,10 +151,8 @@ public class HttpControlInterface {
         return "OK";
     }
 
-    @GET
-    @Path("port/{state:(ON|OFF)}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String setActive(@PathParam("state") String state) throws Exception {
+    @GetMapping(value = "port/{state:(ON|OFF)}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String setActive(@PathVariable("state") String state) throws Exception {
 
         Set<JobKey> def = scheduler.getJobKeys(GroupMatcher.jobGroupContains("DEF"));
         System.out.println(def);
@@ -161,9 +168,7 @@ public class HttpControlInterface {
         return "OK";
     }
 
-    @GET
-    @Path("devices")
-    @Produces({ MediaType.TEXT_XML })
+    @GetMapping(value = "devices", produces = MediaType.TEXT_XML_VALUE)
     public MidiDeviceInfosRepresentation getInputDevices() throws Exception {
         MidiDeviceInfosRepresentation result = new MidiDeviceInfosRepresentation();
         MidiDevice.Info infos[] = MidiSystem.getMidiDeviceInfo();
@@ -209,10 +214,8 @@ public class HttpControlInterface {
         return device;
     }
 
-    @GET
-    @Path("devices/{id}/to/relay")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String addInputDevice(@PathParam("id") int id) throws Exception {
+    @GetMapping(value = "devices/{id}/to/relay", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String addInputDevice(@PathVariable("id") int id) throws Exception {
 
         MidiDevice device = deviceMap.get(id);
         if (device == null) {
@@ -230,52 +233,15 @@ public class HttpControlInterface {
 
     }
 
-    @GET
-    @Path("delay")
-    @Produces(MediaType.TEXT_PLAIN)
+    @GetMapping(value = "delay", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getDelay() {
         return "" + workQueueExecutor.getDelay();
     }
 
-    @PUT
-    @Path("delay")
-    @Consumes()
-    @Produces(MediaType.TEXT_PLAIN)
+    @PutMapping(value = "delay", produces = MediaType.TEXT_PLAIN_VALUE)
     public String setDelay(String delay) {
         workQueueExecutor.setDelay(Long.parseLong(delay));
         return "" + workQueueExecutor.getDelay();
 
-    }
-
-    public MidiPlayer getMidiPlayer() {
-        return midiPlayer;
-    }
-
-    public void setMidiPlayer(MidiPlayer midiPlayer) {
-        this.midiPlayer = midiPlayer;
-    }
-
-    public RemoteRelayReceiver getRemoteRelayReceiver() {
-        return remoteRelayReceiver;
-    }
-
-    public void setRemoteRelayReceiver(RemoteRelayReceiver remoteRelayReceiver) {
-        this.remoteRelayReceiver = remoteRelayReceiver;
-    }
-
-    public Scheduler getScheduler() {
-        return scheduler;
-    }
-
-    public void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    public WorkQueueExecutor getWorkQueueExecutor() {
-        return workQueueExecutor;
-    }
-
-    public void setWorkQueueExecutor(WorkQueueExecutor workQueueExecutor) {
-        this.workQueueExecutor = workQueueExecutor;
     }
 }
