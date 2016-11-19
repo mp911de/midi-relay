@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +35,7 @@ import de.paluch.midi.relay.midi.WorkQueueExecutor;
 import de.paluch.midi.relay.relay.RemoteRelayReceiver;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
@@ -43,6 +45,7 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
+@Slf4j
 public class HttpControlInterface {
 
     private final Map<Integer, MidiDevice> deviceMap = new ConcurrentHashMap<Integer, MidiDevice>();
@@ -108,7 +111,10 @@ public class HttpControlInterface {
 
     @PutMapping(value = "play", produces = MediaType.TEXT_PLAIN_VALUE)
     public String play(@RequestHeader("X-Request-Id") String id, @RequestHeader("X-Request-FileName") String fileName,
-            byte[] body) throws Exception {
+            @RequestBody byte[] body) throws Exception {
+
+        log.info("Play with upload file {}, upload size {}", fileName, body != null ? body.length : -1);
+
         JobDataMap jobData = new JobDataMap();
         PlayerState request = new PlayerState();
         request.setId(id);
@@ -121,6 +127,8 @@ public class HttpControlInterface {
 
     @GetMapping(value = "play/{filename}", produces = MediaType.TEXT_PLAIN_VALUE)
     public String play(@PathVariable("filename") String filename) throws Exception {
+
+        log.info("Play {}", filename);
         midiPlayer.play(filename);
         return "OK";
     }
@@ -133,6 +141,7 @@ public class HttpControlInterface {
 
     @GetMapping(value = "device", produces = MediaType.TEXT_PLAIN_VALUE)
     public String setActive(@RequestParam("id") int id, @RequestParam("state") boolean state) throws Exception {
+
         MidiInstance.getInstance().getWithRelay().setActive(id, state);
         MidiInstance.getInstance().getWithSound().setActive(id, state);
         return "OK";
@@ -140,6 +149,7 @@ public class HttpControlInterface {
 
     @GetMapping(value = "port/{port:[0-8]}/{state:(ON|OFF)}", produces = MediaType.TEXT_PLAIN_VALUE)
     public String setActive(@PathVariable("port") int port, @PathVariable("state") String state) throws Exception {
+
         if (state.equals("ON")) {
             remoteRelayReceiver.on(port);
         }
