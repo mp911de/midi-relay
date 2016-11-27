@@ -147,7 +147,7 @@ public class HttpControlInterface {
         return "OK";
     }
 
-    @GetMapping(value = "port/{port:[0-8]}/{state:(ON|OFF)}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = "port/{port:[0-8]}/{state}", produces = MediaType.TEXT_PLAIN_VALUE)
     public String setActive(@PathVariable("port") int port, @PathVariable("state") String state) throws Exception {
 
         if (state.equals("ON")) {
@@ -161,7 +161,7 @@ public class HttpControlInterface {
         return "OK";
     }
 
-    @GetMapping(value = "port/{state:(ON|OFF)}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = "port/{state}", produces = MediaType.TEXT_PLAIN_VALUE)
     public String setActive(@PathVariable("state") String state) throws Exception {
 
         Set<JobKey> def = scheduler.getJobKeys(GroupMatcher.jobGroupContains("DEF"));
