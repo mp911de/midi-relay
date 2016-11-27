@@ -109,9 +109,10 @@ public class HttpControlInterface {
         return "OK";
     }
 
-    @PutMapping(value = "play", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String play(@RequestHeader("X-Request-Id") String id, @RequestHeader("X-Request-FileName") String fileName,
-            @RequestBody byte[] body) throws Exception {
+    @PutMapping(value = "play", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.ALL_VALUE)
+    public String play(@RequestHeader(value = "X-Request-Id", defaultValue = "") String id,
+            @RequestHeader(value = "X-Request-FileName", defaultValue = "") String fileName, @RequestBody byte[] body)
+            throws Exception {
 
         log.info("Play with upload file {}, upload size {}", fileName, body != null ? body.length : -1);
 
